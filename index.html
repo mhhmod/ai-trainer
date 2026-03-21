@@ -263,14 +263,30 @@
         name: "Atlas Fit AI",
         shell: "Telegram-first trainer workspace",
         signin: "Sign in",
+        signinBusy: "Signing in...",
+        signup: "Create account",
+        signupBusy: "Creating account...",
         signinGoogle: "Continue with Google",
         signinGoogleBusy: "Opening Google...",
         orContinue: "or",
+        authModeTitle: "Access",
+        authModeSignIn: "Sign in",
+        authModeSignUp: "Create",
+        authIntentTitle: "Join as",
+        authIntentClient: "Client",
+        authIntentTrainer: "Trainer",
         authSubtitle: "Sign in once and continue from any device.",
         signinHint: "Fast, secure, and synced with your workspace.",
         signinMissing: "Enter email and password.",
         signinError: "Sign-in failed. Check your details and try again.",
         signinHostRequired: "Open this app on localhost or HTTPS to use Google sign-in.",
+        signupError: "Could not create account. Please try again.",
+        signupCheckEmail: "Check your inbox and confirm your email, then sign in.",
+        trainerReady: "Trainer workspace is ready.",
+        clientReady: "Client workspace is ready.",
+        trainerSetupPending: "Trainer access is pending admin approval.",
+        clientSetupPending: "Client access setup is pending. Try again shortly.",
+        profileSetupWarning: "Signed in, but profile setup still needs completion.",
         email: "Email",
         password: "Password",
         logout: "Sign out",
@@ -329,14 +345,30 @@
         name: "أطلس فت AI",
         shell: "منصة تدريب عبر تيليجرام",
         signin: "تسجيل الدخول",
+        signinBusy: "جاري تسجيل الدخول...",
+        signup: "إنشاء حساب",
+        signupBusy: "جاري إنشاء الحساب...",
         signinGoogle: "المتابعة عبر Google",
         signinGoogleBusy: "جاري فتح Google...",
         orContinue: "أو",
+        authModeTitle: "الدخول",
+        authModeSignIn: "تسجيل الدخول",
+        authModeSignUp: "إنشاء حساب",
+        authIntentTitle: "التسجيل كـ",
+        authIntentClient: "عميل",
+        authIntentTrainer: "مدرب",
         authSubtitle: "سجّل الدخول مرة واحدة وتابع من أي جهاز.",
         signinHint: "سريع وآمن ومتزامن مع مساحة عملك.",
         signinMissing: "أدخل البريد وكلمة المرور.",
         signinError: "فشل تسجيل الدخول. تحقق من البيانات وحاول مرة أخرى.",
         signinHostRequired: "افتح التطبيق عبر localhost أو HTTPS لاستخدام تسجيل Google.",
+        signupError: "تعذر إنشاء الحساب. حاول مرة أخرى.",
+        signupCheckEmail: "تحقق من البريد الإلكتروني ثم قم بتسجيل الدخول.",
+        trainerReady: "تم تجهيز مساحة المدرب.",
+        clientReady: "تم تجهيز مساحة العميل.",
+        trainerSetupPending: "وصول المدرب قيد انتظار موافقة الإدارة.",
+        clientSetupPending: "إعداد وصول العميل قيد التنفيذ. حاول لاحقاً.",
+        profileSetupWarning: "تم تسجيل الدخول لكن إعداد الملف الشخصي يحتاج إكمالاً.",
         email: "البريد الإلكتروني",
         password: "كلمة المرور",
         logout: "تسجيل الخروج",
@@ -413,7 +445,7 @@
       dir: "ltr",
       tabs: { trainer: "home", client: "today" },
       activeThreadId: null,
-      auth: { loading: false, oauthLoading: false, error: "" },
+      auth: { loading: false, oauthLoading: false, error: "", notice: "", mode: "signin", intent: "client" },
       fetch: { loading: false, error: "", details: {} },
       submitting: { message: false, checkin: false },
       toast: "",
@@ -439,14 +471,40 @@
     };
 
     const uiStore = "atlas_fit_ui";
+    const authIntentStore = "atlas_fit_pending_intent";
     const loc = () => I18N[state.lang] || I18N.en;
     const txt = (path) => path.split(".").reduce((a, k) => (a && k in a ? a[k] : null), loc()) ?? path;
     const esc = (v) => String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&#39;");
     const dateFmt = (v) => v ? new Intl.DateTimeFormat(state.lang === "ar" ? "ar" : "en", { dateStyle: "medium" }).format(new Date(v)) : "-";
     const moneyFmt = (c, code = "USD") => new Intl.NumberFormat(state.lang === "ar" ? "ar" : "en", { style: "currency", currency: code }).format((Number(c || 0)) / 100);
 
+    function authIntent(v) { return v === "trainer" ? "trainer" : "client"; }
+    function authMode(v) { return v === "signup" ? "signup" : "signin"; }
+    function setPendingIntent(intent) {
+      localStorage.setItem(authIntentStore, JSON.stringify({ intent: authIntent(intent), ts: Date.now() }));
+    }
+    function consumePendingIntent() {
+      const raw = localStorage.getItem(authIntentStore);
+      if (!raw) return null;
+      localStorage.removeItem(authIntentStore);
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.intent || !parsed.ts) return null;
+        if ((Date.now() - Number(parsed.ts)) > 86_400_000) return null;
+        return authIntent(parsed.intent);
+      } catch (_) {
+        return authIntent(raw);
+      }
+    }
     function savePrefs() {
-      localStorage.setItem(uiStore, JSON.stringify({ lang: state.lang, dir: state.dir, tabs: state.tabs, role: state.role }));
+      localStorage.setItem(uiStore, JSON.stringify({
+        lang: state.lang,
+        dir: state.dir,
+        tabs: state.tabs,
+        role: state.role,
+        auth_mode: state.auth.mode,
+        auth_intent: state.auth.intent
+      }));
     }
     function loadPrefs() {
       try {
@@ -455,6 +513,8 @@
         if (p.dir === "ltr" || p.dir === "rtl") state.dir = p.dir;
         if (p.tabs) state.tabs = { ...state.tabs, ...p.tabs };
         if (p.role) state.role = p.role;
+        state.auth.mode = authMode(p.auth_mode);
+        state.auth.intent = authIntent(p.auth_intent);
       } catch (_) {}
     }
     function applyLangDir() {
@@ -491,6 +551,10 @@
       state.role = null;
       state.availableRoles = [];
       state.activeThreadId = null;
+      state.auth.loading = false;
+      state.auth.oauthLoading = false;
+      state.auth.error = "";
+      state.auth.notice = "";
       state.fetch = { loading: false, error: "", details: {} };
       state.data = {
         profile: null, trainerHome: [], trainerClients: [], trainerPrograms: [], trainerCheckins: [], growth: [], priorityQueue: [],
@@ -516,6 +580,7 @@
         state.auth.oauthLoading = false;
         if (session) {
           state.auth.error = "";
+          state.auth.notice = "";
           await bootstrapAuthed();
         } else {
           resetAuthed();
@@ -621,7 +686,57 @@
       state.fetch.loading = false;
     }
 
+    async function ensurePostAuthSetup() {
+      const pending = consumePendingIntent();
+      if (!pending || !state.user || !state.supabase) return;
+      const uid = state.user.id;
+      let shouldBootstrapMembership = false;
+      try {
+        const { data: profile, error: profileErr } = await state.supabase
+          .from("user_profiles")
+          .select("user_id,default_role")
+          .eq("user_id", uid)
+          .maybeSingle();
+        if (profileErr && profileErr.code !== "PGRST116") throw profileErr;
+        const base = { user_id: uid, preferred_language: state.lang, preferred_direction: state.dir };
+        if (!profile?.default_role) {
+          base.default_role = pending;
+          shouldBootstrapMembership = true;
+        }
+        const { error: upsertErr } = await state.supabase.from("user_profiles").upsert(base, { onConflict: "user_id" });
+        if (upsertErr) throw upsertErr;
+      } catch (_) {
+        toast(txt("profileSetupWarning"));
+        return;
+      }
+      if (!shouldBootstrapMembership) return;
+
+      try {
+        const { data: members, error: membersErr } = await state.supabase
+          .from("organization_memberships")
+          .select("organization_id,role,status")
+          .eq("user_id", uid)
+          .eq("status", "active");
+        if (membersErr) throw membersErr;
+        const hasRole = (members || []).some((m) => m.role === pending || (pending === "trainer" && m.role === "admin"));
+        if (!hasRole) {
+          const { data: orgs, error: orgErr } = await state.supabase.from("organizations").select("id").order("created_at", { ascending: true }).limit(1);
+          if (orgErr) throw orgErr;
+          const orgId = orgs?.[0]?.id;
+          if (!orgId) throw new Error("No organization");
+          const { error: memberUpsertErr } = await state.supabase
+            .from("organization_memberships")
+            .upsert({ organization_id: orgId, user_id: uid, role: pending, status: "active" }, { onConflict: "organization_id,user_id" });
+          if (memberUpsertErr) throw memberUpsertErr;
+        }
+        toast(txt(pending === "trainer" ? "trainerReady" : "clientReady"));
+      } catch (_) {
+        toast(txt(pending === "trainer" ? "trainerSetupPending" : "clientSetupPending"));
+      }
+    }
+
     async function bootstrapAuthed() {
+      await ensurePostAuthSetup();
       await loadUserContext();
       await loadData();
       render();
@@ -653,13 +768,31 @@
 
     function authShell() {
       const busy = state.auth.loading || state.auth.oauthLoading;
+      const isSignUp = state.auth.mode === "signup";
+      const primaryLabel = state.auth.loading
+        ? txt(isSignUp ? "signupBusy" : "signinBusy")
+        : txt(isSignUp ? "signup" : "signin");
       return `
         <section class="auth-wrap">
           <article class="auth-card" aria-label="Auth form">
             <div class="stack">
               <div class="brand"><span class="brand-dot"></span><div class="brand-title">${esc(txt("name"))}</div></div>
-              <h1 style="font-size:20px">${esc(txt("signin"))}</h1>
+              <h1 style="font-size:20px">${esc(txt(isSignUp ? "signup" : "signin"))}</h1>
               <p class="muted">${esc(txt("authSubtitle"))}</p>
+            </div>
+            <div class="field">
+              <label>${esc(txt("authIntentTitle"))}</label>
+              <div class="segmented">
+                <button type="button" data-action="set-auth-intent" data-intent="client" class="${state.auth.intent === "client" ? "is-active" : ""}" ${busy ? "disabled" : ""}>${esc(txt("authIntentClient"))}</button>
+                <button type="button" data-action="set-auth-intent" data-intent="trainer" class="${state.auth.intent === "trainer" ? "is-active" : ""}" ${busy ? "disabled" : ""}>${esc(txt("authIntentTrainer"))}</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>${esc(txt("authModeTitle"))}</label>
+              <div class="segmented">
+                <button type="button" data-action="set-auth-mode" data-mode="signin" class="${state.auth.mode === "signin" ? "is-active" : ""}" ${busy ? "disabled" : ""}>${esc(txt("authModeSignIn"))}</button>
+                <button type="button" data-action="set-auth-mode" data-mode="signup" class="${state.auth.mode === "signup" ? "is-active" : ""}" ${busy ? "disabled" : ""}>${esc(txt("authModeSignUp"))}</button>
+              </div>
             </div>
             <div class="auth-actions">
               <button class="btn btn-google" type="button" data-action="sign-in-google" ${busy ? "disabled" : ""}>
@@ -670,12 +803,13 @@
             </div>
             <form id="auth-form" class="auth-grid" novalidate>
               <div class="field"><label for="auth-email">${esc(txt("email"))}</label><input id="auth-email" name="email" class="input" type="email" inputmode="email" spellcheck="false" autocomplete="email" required autofocus ${busy ? "disabled" : ""} /></div>
-              <div class="field"><label for="auth-password">${esc(txt("password"))}</label><input id="auth-password" name="password" class="input" type="password" autocomplete="current-password" required ${busy ? "disabled" : ""} /></div>
+              <div class="field"><label for="auth-password">${esc(txt("password"))}</label><input id="auth-password" name="password" class="input" type="password" autocomplete="${isSignUp ? "new-password" : "current-password"}" minlength="8" required ${busy ? "disabled" : ""} /></div>
               <div class="row" style="justify-content:flex-start;gap:10px">
-                <button class="btn btn-primary" type="submit" ${busy ? "disabled" : ""}>${esc(state.auth.loading ? `${txt("signin")}...` : txt("signin"))}</button>
+                <button class="btn btn-primary" type="submit" ${busy ? "disabled" : ""}>${esc(primaryLabel)}</button>
                 ${state.auth.error ? `<span class="badge badge-danger">${esc(state.auth.error)}</span>` : ""}
               </div>
             </form>
+            ${state.auth.notice ? `<div class="state"><div class="state-copy">${esc(state.auth.notice)}</div></div>` : ""}
             <p class="soft">${esc(txt("signinHint"))}</p>
           </article>
         </section>`;
@@ -793,18 +927,53 @@
       if (state.auth.loading || state.auth.oauthLoading) return;
       if (!state.supabase) { state.auth.error = txt("signinError"); render(); return; }
       if (!email || !password) { state.auth.error = txt("signinMissing"); render(); return; }
-      state.auth.loading = true; state.auth.error = ""; render();
+      state.auth.loading = true;
+      state.auth.error = "";
+      state.auth.notice = "";
+      render();
       const { error } = await state.supabase.auth.signInWithPassword({ email, password });
       state.auth.loading = false;
       if (error) state.auth.error = error.message || txt("signinError");
       render();
     }
+    async function signUp(email, password) {
+      if (state.auth.loading || state.auth.oauthLoading) return;
+      if (!state.supabase) { state.auth.error = txt("signupError"); render(); return; }
+      if (!email || !password) { state.auth.error = txt("signinMissing"); render(); return; }
+      state.auth.loading = true;
+      state.auth.error = "";
+      state.auth.notice = "";
+      render();
+      const { data, error } = await state.supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { signup_intent: state.auth.intent, preferred_language: state.lang, preferred_direction: state.dir }
+        }
+      });
+      state.auth.loading = false;
+      if (error) {
+        state.auth.error = error.message || txt("signupError");
+        render();
+        return;
+      }
+      setPendingIntent(state.auth.intent);
+      if (!data?.session) {
+        state.auth.mode = "signin";
+        state.auth.notice = txt("signupCheckEmail");
+        savePrefs();
+        render();
+      }
+    }
     async function signInWithGoogle() {
       if (state.auth.loading || state.auth.oauthLoading) return;
       if (!state.supabase) { state.auth.error = txt("signinError"); render(); return; }
       if (window.location.protocol === "file:") { state.auth.error = txt("signinHostRequired"); render(); return; }
+      if (state.auth.mode === "signup") setPendingIntent(state.auth.intent);
+      else localStorage.removeItem(authIntentStore);
       state.auth.oauthLoading = true;
       state.auth.error = "";
+      state.auth.notice = "";
       render();
       const { data, error } = await state.supabase.auth.signInWithOAuth({
         provider: "google",
@@ -880,6 +1049,16 @@
         if (!el) return;
         const a = el.dataset.action;
         if (a === "sign-in-google") { signInWithGoogle(); return; }
+        if (a === "set-auth-intent") { state.auth.intent = authIntent(el.dataset.intent); state.auth.error = ""; state.auth.notice = ""; savePrefs(); render(); return; }
+        if (a === "set-auth-mode") {
+          state.auth.mode = authMode(el.dataset.mode);
+          state.auth.error = "";
+          state.auth.notice = "";
+          if (state.auth.mode === "signin") localStorage.removeItem(authIntentStore);
+          savePrefs();
+          render();
+          return;
+        }
         if (a === "set-lang") { state.lang = el.dataset.lang === "ar" ? "ar" : "en"; state.dir = state.lang === "ar" ? "rtl" : "ltr"; render(); return; }
         if (a === "set-dir") { state.dir = el.dataset.dir === "rtl" ? "rtl" : "ltr"; render(); return; }
         if (a === "switch-role") { if (state.availableRoles.includes(el.dataset.role)) { state.role = el.dataset.role; loadData(); render(); } return; }
@@ -896,7 +1075,10 @@
         if (form.id === "auth-form") {
           event.preventDefault();
           const fd = new FormData(form);
-          await signIn(String(fd.get("email") || "").trim(), String(fd.get("password") || ""));
+          const email = String(fd.get("email") || "").trim();
+          const password = String(fd.get("password") || "");
+          if (state.auth.mode === "signup") await signUp(email, password);
+          else await signIn(email, password);
           return;
         }
         if (form.id === "message-form") {
