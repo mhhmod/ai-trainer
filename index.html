@@ -256,6 +256,7 @@
   <script>
     const SUPABASE_URL = "https://qldgpkqpyfpqfdchozsp.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_m1hTdX1bx30XKKTBYhgRmQ_5P-WnwCB";
+    const SUPABASE_PROJECT_REF = "qldgpkqpyfpqfdchozsp";
     const app = document.getElementById("app");
 
     const I18N = {
@@ -765,7 +766,7 @@
             ${roleSwitch}
             <div class="segmented"><button data-action="set-lang" data-lang="en" class="${state.lang === "en" ? "is-active" : ""}">EN</button><button data-action="set-lang" data-lang="ar" class="${state.lang === "ar" ? "is-active" : ""}">AR</button></div>
             <div class="segmented"><button data-action="set-dir" data-dir="ltr" class="${state.dir === "ltr" ? "is-active" : ""}">${esc(txt("ltr"))}</button><button data-action="set-dir" data-dir="rtl" class="${state.dir === "rtl" ? "is-active" : ""}">${esc(txt("rtl"))}</button></div>
-            <button class="btn btn-danger" data-action="sign-out">${esc(txt("logout"))}</button>
+            <button class="btn btn-danger" data-action="sign-out" onclick="window.__atlasSignOut && window.__atlasSignOut(); return false;">${esc(txt("logout"))}</button>
           </div>
         </header>`;
     }
@@ -927,12 +928,24 @@
       try { return decodeURIComponent(String(message).replaceAll("+", " ")); } catch (_) { return String(message); }
     }
     function clearSupabaseAuthCache() {
-      const keys = [];
-      for (let i = 0; i < localStorage.length; i += 1) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith("sb-") && k.endsWith("-auth-token")) keys.push(k);
-      }
-      keys.forEach((k) => localStorage.removeItem(k));
+      const shouldRemove = (k) => {
+        if (!k) return false;
+        if (k.startsWith("sb-") && k.includes("-auth-token")) return true;
+        if (k.includes(SUPABASE_PROJECT_REF) && k.toLowerCase().includes("auth")) return true;
+        if (k.toLowerCase().includes("supabase.auth")) return true;
+        return false;
+      };
+      const purgeStore = (store) => {
+        if (!store) return;
+        const keys = [];
+        for (let i = 0; i < store.length; i += 1) {
+          const k = store.key(i);
+          if (shouldRemove(k)) keys.push(k);
+        }
+        keys.forEach((k) => store.removeItem(k));
+      };
+      try { purgeStore(window.localStorage); } catch (_) {}
+      try { purgeStore(window.sessionStorage); } catch (_) {}
     }
 
     async function signIn(email, password) {
@@ -1020,8 +1033,16 @@
       let hadError = false;
       try {
         if (state.supabase) {
-          const { error } = await state.supabase.auth.signOut({ scope: "local" });
-          if (error) hadError = true;
+          const attempts = [{ scope: "global" }, { scope: "local" }, null];
+          for (const cfg of attempts) {
+            try {
+              const res = cfg ? await state.supabase.auth.signOut(cfg) : await state.supabase.auth.signOut();
+              if (!res?.error) break;
+              hadError = true;
+            } catch (_) {
+              hadError = true;
+            }
+          }
         }
       } catch (_) {
         hadError = true;
@@ -1032,6 +1053,11 @@
       resetAuthed();
       render();
       toast(txt(hadError ? "signoutError" : "signedOut"));
+      setTimeout(() => {
+        if (!state.session) {
+          try { window.location.replace(authRedirectTo()); } catch (_) {}
+        }
+      }, 80);
     }
     async function saveProfilePrefs() {
       if (!state.user) return;
@@ -1093,7 +1119,7 @@
         if (a === "set-tab") { state.tabs[el.dataset.scope] = el.dataset.tab; savePrefs(); render(); return; }
         if (a === "open-thread") { state.activeThreadId = el.dataset.thread || null; if (state.activeThreadId) loadMessages(state.activeThreadId).then(render); render(); return; }
         if (a === "retry-load") { loadData(); return; }
-        if (a === "sign-out") { signOut(); return; }
+        if (a === "sign-out") { event.preventDefault(); signOut(); return; }
         if (a === "save-pref") { saveProfilePrefs(); return; }
       });
 
@@ -1127,6 +1153,7 @@
     async function init() {
       loadPrefs();
       applyLangDir();
+      window.__atlasSignOut = () => { signOut(); };
       const oauthError = parseOAuthErrorFromUrl();
       if (oauthError) state.auth.error = oauthError;
       if (window.Telegram && window.Telegram.WebApp) {
