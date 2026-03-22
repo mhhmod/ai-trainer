@@ -570,6 +570,15 @@
             return { path: "/verify", query: new URLSearchParams(rawHash.slice(1)) };
           }
           const cleaned = rawHash.startsWith("#") ? rawHash.slice(1) : rawHash;
+          const nestedHashIndex = cleaned.indexOf("#access_token=");
+          if (nestedHashIndex >= 0) {
+            const basePath = cleaned.slice(0, nestedHashIndex) || "/verify";
+            const tokenQuery = cleaned.slice(nestedHashIndex + 1);
+            return {
+              path: basePath.startsWith("/") ? basePath : `/${basePath}`,
+              query: new URLSearchParams(tokenQuery),
+            };
+          }
           const [path, qs = ""] = cleaned.split("?");
           return { path: path.startsWith("/") ? path : `/${path}`, query: new URLSearchParams(qs) };
         }
