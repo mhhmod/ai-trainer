@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GrindCTRL AI Trainer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' x2='100%25' y1='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232a5cff'/%3E%3Cstop offset='100%25' stop-color='%2389a4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%230d100c'/%3E%3Cpath d='M35 8 18 35h10l-3 21 21-31H35z' fill='url(%23g)'/%3E%3C/svg%3E" />
     <meta
       name="description"
       content="GrindCTRL AI Trainer is a bilingual trainer-client platform for coaching, programs, check-ins, progress, communication, and access control."
@@ -815,6 +816,24 @@
           });
         }
 
+        async function signUpWithOtp(input) {
+          const redirect = redirectTarget("/verify");
+          return apiFetch(`/auth/v1/otp${redirect ? `?redirect_to=${encodeURIComponent(redirect)}` : ""}`, {
+            auth: false,
+            method: "POST",
+            body: {
+              email: input.email,
+              create_user: true,
+              data: {
+                display_name: input.fullName,
+                preferred_language: input.language,
+                preferred_direction: input.language === "ar" ? "rtl" : "ltr",
+                default_role: input.accountType === "trainer" ? "trainer" : "client",
+              },
+            },
+          });
+        }
+
         async function signInWithPassword(email, password) {
           const data = await apiFetch("/auth/v1/token?grant_type=password", {
             auth: false,
@@ -878,7 +897,9 @@
           try {
             return await restSelect(table, options);
           } catch (error) {
-            if (String(error.message || "").includes("relation") || String(error.message || "").includes("permission")) return fallback;
+            const message = String(error.message || "");
+            if (message.includes("PGRST116") || message.includes("JSON object requested, multiple (or no) rows returned")) return fallback;
+            if (message.includes("relation") || message.includes("permission")) return fallback;
             throw error;
           }
         }
@@ -1169,11 +1190,31 @@
         async function syncRoute() {
           state.route = parseRoute(window.location.hash);
           render();
+          if (state.route.path === "/signup") {
+            const passwordInput = document.querySelector('#signup-form input[name="password"]');
+            const passwordField = passwordInput?.closest(".field");
+            if (passwordInput) {
+              passwordInput.required = false;
+              passwordInput.disabled = true;
+              passwordInput.value = "";
+            }
+            if (passwordField) passwordField.style.display = "none";
+          }
           if (!pageGuard()) return;
           await loadPublicPackages();
           if (state.session) await loadUserContext();
           await loadRouteData();
           render();
+          if (state.route.path === "/signup") {
+            const passwordInput = document.querySelector('#signup-form input[name="password"]');
+            const passwordField = passwordInput?.closest(".field");
+            if (passwordInput) {
+              passwordInput.required = false;
+              passwordInput.disabled = true;
+              passwordInput.value = "";
+            }
+            if (passwordField) passwordField.style.display = "none";
+          }
         }
 
         function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim()); }
@@ -1568,6 +1609,7 @@
             `
               ${inviteMode ? `<div class="notice-strip">${icon("shield")}<div><strong>${escapeHtml(tr("Invite token saved", "تم حفظ رمز الدعوة"))}</strong><p class="body-copy">${escapeHtml(tr("Finish signup, verify your email, then accept the invite.", "أكمل التسجيل وتحقق من بريدك ثم اقبل الدعوة."))}</p></div></div>` : ""}
               <form id="signup-form" class="card">
+                <div class="notice-strip" style="margin-bottom:18px;">${icon("mail")}<div><strong>${escapeHtml(tr("Email-link signup", "ØªØ³Ø¬ÙŠÙ„ Ø¨Ø±Ø§Ø¨Ø· Ø¨Ø±ÙŠØ¯"))}</strong><p class="body-copy">${escapeHtml(tr("This flow now sends a secure email link to finish account creation. If this email already has an account, use Login instead.", "Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³Ø§Ø± ÙŠØ±Ø³Ù„ Ø§Ù„Ø¢Ù† Ø±Ø§Ø¨Ø·Ù‹Ø§ Ø¢Ù…Ù†Ù‹Ø§ Ø¹Ø¨Ø± Ø§Ù„Ø¨Ø±ÙŠØ¯ Ù„Ø¥ÙƒÙ…Ø§Ù„ Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨. Ø¥Ø°Ø§ ÙƒØ§Ù† Ù„Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø­Ø³Ø§Ø¨ Ù…ÙˆØ¬ÙˆØ¯ ÙØ§Ø³ØªØ®Ø¯Ù… ØµÙØ­Ø© Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø¯Ù„Ù‹Ø§ Ù…Ù† Ø°Ù„Ùƒ."))}</p></div></div>
                 <div class="field-grid">
                   <div class="field"><label>${escapeHtml(tr("Full name", "الاسم الكامل"))}</label><input class="input" type="text" name="fullName" required /></div>
                   <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" required /></div>
@@ -1611,7 +1653,7 @@
             hasSession ? tr("Verification complete", "اكتمل التحقق") : tr("Verify your email", "تحقق من بريدك"),
             hasSession
               ? tr("Your session is live. Continue into the correct journey based on your role and pending bootstrap state.", "جلستك أصبحت نشطة. تابع إلى المسار الصحيح حسب دورك وحالة التهيئة المعلقة.")
-              : tr("Password signup usually sends a confirmation email link. If your email contains a one-time code instead, enter it here. If nothing arrives, send yourself a fresh magic link below.", "تسجيل كلمة المرور يرسل عادةً رابط تأكيد إلى البريد. إذا احتوى البريد على رمز لمرة واحدة فأدخله هنا. وإذا لم يصلك شيء فأرسل لنفسك رابطًا جديدًا بالأسفل."),
+              : tr("Signup and magic-link login both send an email confirmation link. If your email contains a one-time code instead, enter it here. If nothing arrives, send yourself a fresh magic link below.", "التسجيل والدخول بالرابط يرسلان رابط تأكيد إلى البريد. إذا احتوى البريد على رمز لمرة واحدة فأدخله هنا. وإذا لم يصلك شيء فأرسل لنفسك رابطًا جديدًا بالأسفل."),
             hasSession
               ? `
                 <div class="card">
@@ -1623,7 +1665,7 @@
               `
               : `
                 <div class="stack">
-                  <div class="notice-strip">${icon("mail")}<div><strong>${escapeHtml(tr("Expect a link first", "توقع رابطًا أولًا"))}</strong><p class="body-copy">${escapeHtml(tr("Supabase password signup sends a confirmation email by default. The code field below only applies if the email actually contains a code.", "إعداد Supabase الافتراضي لتسجيل كلمة المرور يرسل رسالة تأكيد بالبريد. حقل الرمز بالأسفل يُستخدم فقط إذا احتوى البريد فعليًا على رمز."))}</p></div></div>
+                  <div class="notice-strip">${icon("mail")}<div><strong>${escapeHtml(tr("Expect a link first", "توقع رابطًا أولًا"))}</strong><p class="body-copy">${escapeHtml(tr("This app now creates accounts through the same email-link flow used by magic-link login. The code field below only applies if the email actually contains a code.", "هذا التطبيق ينشئ الحسابات الآن عبر نفس مسار رابط البريد المستخدم في تسجيل الدخول. حقل الرمز بالأسفل يُستخدم فقط إذا احتوى البريد فعليًا على رمز."))}</p></div></div>
                   <form id="verify-form" class="card">
                     <div class="field-grid">
                       <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" value="${escapeHtml(pendingEmail)}" required /></div>
@@ -2507,6 +2549,59 @@
               await signInWithMagicLink(email);
               toast(tr("Magic link sent. Check your inbox.", "تم إرسال الرابط. تحقق من بريدك."), "success");
             });
+            return;
+          }
+
+          if (form.id === "signup-form" && !form.dataset.otpModeHandled) {
+            form.dataset.otpModeHandled = "1";
+            try {
+              await runTask(tr("Creating account", "Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨"), async () => {
+                const email = String(formData.get("email") || "").trim().toLowerCase();
+                const accountType = String(formData.get("accountType") || "client");
+                const language = String(formData.get("language") || state.language);
+                const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
+                if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ù‹Ø§ ØµØ­ÙŠØ­Ù‹Ø§"));
+                rememberPendingEmail(email);
+                if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
+                if (accountType === "trainer") {
+                  writeJson(STORAGE_KEYS.bootstrap, {
+                    kind: "trainer",
+                    payload: {
+                      workspaceName: String(formData.get("workspaceName") || "").trim(),
+                      brandName: String(formData.get("brandName") || "").trim(),
+                      workspaceShape: String(formData.get("workspaceShape") || "trainer"),
+                      packageInterest: String(formData.get("packageInterest") || "solo_coach"),
+                      coachingType: String(formData.get("coachingType") || "").trim(),
+                      audience: String(formData.get("audience") || "").trim(),
+                      language,
+                      timezone: String(formData.get("timezone") || "UTC").trim(),
+                    },
+                  });
+                } else if (!inviteToken) {
+                  writeJson(STORAGE_KEYS.bootstrap, {
+                    kind: "client",
+                    payload: {
+                      goal: String(formData.get("goal") || "").trim(),
+                      constraints: String(formData.get("constraints") || "").trim(),
+                      language,
+                      timezone: String(formData.get("timezone") || "UTC").trim(),
+                    },
+                  });
+                } else {
+                  removeStorage(STORAGE_KEYS.bootstrap);
+                }
+                await signUpWithOtp({
+                  fullName: String(formData.get("fullName") || "").trim(),
+                  email,
+                  accountType,
+                  language,
+                });
+                toast(tr("Check your email for the secure sign-in link. That link will complete account creation and bring you back here.", "ØªØ­Ù‚Ù‚ Ù…Ù† Ø¨Ø±ÙŠØ¯Ùƒ Ù„Ø±Ø§Ø¨Ø· Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø§Ù„Ø¢Ù…Ù†. Ù‡Ø°Ø§ Ø§Ù„Ø±Ø§Ø¨Ø· Ø³ÙŠÙƒÙ…Ù„ Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨ ÙˆÙŠØ¹ÙŠØ¯Ùƒ Ø¥Ù„Ù‰ Ù‡Ù†Ø§."), "success");
+                window.location.hash = pathToHash("/verify");
+              });
+            } finally {
+              delete form.dataset.otpModeHandled;
+            }
             return;
           }
 
