@@ -1053,14 +1053,14 @@
               data = { checkins: await restSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "created_at", ascending: false }, limit: 50 }) };
             } else if (route === "/app/trainer/messages" || route === "/app/client/messages") {
               const threadFilters = currentRole() === "trainer" ? [{ column: "organization_id", value: currentOrgId() }] : [{ column: "client_user_id", value: state.user.id }];
-              const threads = await restSelect("message_threads", { select: "*", filters: threadFilters, order: { column: "updated_at", ascending: false }, limit: 50 });
+              const threads = await restSelect("v_message_threads_overview", { select: "*", filters: threadFilters, order: { column: "updated_at", ascending: false }, limit: 50 });
               if (!state.ui.selectedThreadId && threads[0]?.id) state.ui.selectedThreadId = threads[0].id;
               const messages = state.ui.selectedThreadId ? await restSelect("messages", { select: "*", filters: [{ column: "thread_id", value: state.ui.selectedThreadId }], order: { column: "sent_at", ascending: true }, limit: 150 }) : [];
               const clients = currentRole() === "trainer" ? await restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }) : [];
               data = { threads, messages, clients };
             } else if (route === "/app/trainer/calendar" || route === "/app/client/calendar") {
               const filters = currentRole() === "trainer" ? [{ column: "organization_id", value: currentOrgId() }] : [{ column: "client_user_id", value: state.user.id }];
-              data = { sessions: await restSelect("workout_sessions", { select: "*", filters, order: { column: "scheduled_for", ascending: true, nulls: "nullslast" }, limit: 40 }) };
+              data = { sessions: await restSelect("v_calendar_agenda", { select: "*", filters, order: { column: "scheduled_for", ascending: true, nulls: "nullslast" }, limit: 60 }) };
             } else if (route === "/app/trainer/files") {
               data = { profile: state.profile, organization: state.organization };
             } else if (route === "/app/trainer/analytics") {
@@ -1104,12 +1104,7 @@
               ]);
               data = { memberships, admins };
             } else if (route === "/app/admin/support") {
-              const [activation, incidents, recovery] = await Promise.all([
-                safeSelect("activation_requests", { select: "*", order: { column: "created_at", ascending: false }, limit: 40 }, []),
-                safeSelect("incident_logs", { select: "*", order: { column: "created_at", ascending: false }, limit: 40 }, []),
-                safeSelect("recovery_markers", { select: "*", order: { column: "created_at", ascending: false }, limit: 40 }, []),
-              ]);
-              data = { activation, incidents, recovery };
+              data = { queue: await safeSelect("v_admin_support_queue", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
             } else if (route === "/app/admin/audit") {
               data = { audit: await safeSelect("audit_log", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
             } else if (route === "/app/admin/settings") {
@@ -1870,10 +1865,10 @@
             <section class="message-shell">
               <aside class="card">
                 <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Threads", "المحادثات"))}</p><h3 class="card-title">${escapeHtml(tr("Open conversations", "المحادثات المفتوحة"))}</h3></div></div>
-                <div class="thread-list">
-                  ${(data.threads || []).length ? data.threads.map((thread) => `<button class="thread-item ${thread.id === selectedThreadId ? "is-active" : ""}" type="button" data-action="choose-thread" data-thread-id="${escapeHtml(thread.id)}"><strong>${escapeHtml(pick(thread, ["topic"], tr("Client thread", "محادثة عميل")))}</strong><br /><span class="muted">${escapeHtml(formatDate(thread.updated_at, { dateStyle: "medium", timeStyle: "short" }))}</span></button>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No threads yet", "لا توجد محادثات بعد"))}</strong></div>`}
-                </div>
-              </aside>
+                  <div class="thread-list">
+                    ${(data.threads || []).length ? data.threads.map((thread) => `<button class="thread-item ${thread.id === selectedThreadId ? "is-active" : ""}" type="button" data-action="choose-thread" data-thread-id="${escapeHtml(thread.id)}"><strong>${escapeHtml(pick(thread, ["topic", "last_message_body"], tr("Client thread", "محادثة عميل")))}</strong><br /><span class="muted">${escapeHtml(formatDate(thread.updated_at, { dateStyle: "medium", timeStyle: "short" }))}${thread.unread_count ? ` • ${escapeHtml(String(thread.unread_count))} ${escapeHtml(tr("unread", "غير مقروءة"))}` : ""}</span></button>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No threads yet", "لا توجد محادثات بعد"))}</strong></div>`}
+                  </div>
+                </aside>
               <div class="stack">
                 <article class="card">
                   <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Conversation", "المحادثة"))}</p><h3 class="card-title">${escapeHtml(selectedThread ? pick(selectedThread, ["topic"], tr("Conversation", "المحادثة")) : tr("Select a thread", "اختر محادثة"))}</h3></div></div>
@@ -1894,9 +1889,9 @@
 
         function renderCalendar(data) {
           return `
-            <div class="stack">
-              ${currentRole() === "trainer" ? `
-                <form id="workout-session-form" class="card">
+              <div class="stack">
+                ${currentRole() === "trainer" ? `
+                  <form id="workout-session-form" class="card">
                   <p class="card-kicker">${escapeHtml(tr("Schedule", "الجدولة"))}</p>
                   <h3 class="card-title">${escapeHtml(tr("Create a workout session", "أنشئ جلسة تمرين"))}</h3>
                   <div class="field-grid">
@@ -1906,41 +1901,41 @@
                   <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Notes", "ملاحظات"))}</label><input class="input" type="text" name="notes" /></div>
                   <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Schedule session", "جدولة الجلسة"))}</button></div>
                 </form>
-              ` : ""}
-              <article class="card">
-                <p class="card-kicker">${escapeHtml(tr("Upcoming", "القادم"))}</p>
-                <h3 class="card-title">${escapeHtml(tr("Session timeline", "الخط الزمني للجلسات"))}</h3>
-                <div class="timeline">
-                  ${(data.sessions || []).length ? data.sessions.map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(formatDate(row.scheduled_for, { dateStyle: "medium", timeStyle: "short" }))}</strong>${statusPill(row.status)}</div><p class="timeline-copy">${escapeHtml(row.notes || tr("Workout session", "جلسة تمرين"))}</p></article>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No sessions scheduled", "لا توجد جلسات مجدولة"))}</strong></div>`}
-                </div>
-              </article>
-            </div>
-          `;
+                ` : ""}
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Upcoming", "القادم"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Agenda timeline", "الخط الزمني للأجندة"))}</h3>
+                  <div class="timeline">
+                    ${(data.sessions || []).length ? data.sessions.map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(formatDate(row.scheduled_for, { dateStyle: "medium", timeStyle: "short" }))}</strong>${statusPill(row.status)}</div><p class="timeline-copy">${escapeHtml(row.title || row.notes || tr("Workout session", "جلسة تمرين"))}</p>${row.notes && row.notes !== row.title ? `<p class="muted">${escapeHtml(row.notes)}</p>` : ""}</article>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No agenda items scheduled", "لا توجد عناصر مجدولة في الأجندة"))}</strong></div>`}
+                  </div>
+                </article>
+              </div>
+            `;
         }
 
         function renderFiles() {
           return `
-            <div class="stack">
-              <form id="file-upload-form" class="card">
-                <p class="card-kicker">${escapeHtml(tr("Upload", "رفع"))}</p>
-                <h3 class="card-title">${escapeHtml(tr("Store files in the right bucket", "احفظ الملفات في الحاوية المناسبة"))}</h3>
-                <div class="field-grid">
-                  <div class="field"><label>${escapeHtml(tr("Bucket", "الحاوية"))}</label><select class="select" name="bucket"><option value="coach-assets">${escapeHtml(tr("Coach assets", "ملفات المدرب"))}</option><option value="message-attachments">${escapeHtml(tr("Private attachments", "المرفقات الخاصة"))}</option><option value="progress-media">${escapeHtml(tr("Progress media", "وسائط التقدم"))}</option></select></div>
-                  <div class="field"><label>${escapeHtml(tr("File", "الملف"))}</label><input class="input" type="file" name="file" required /></div>
-                </div>
-                <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Optional note", "ملاحظة اختيارية"))}</label><input class="input" type="text" name="note" /></div>
-                <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Upload file", "رفع الملف"))}</button></div>
-              </form>
-              <article class="card">
-                <p class="card-kicker">${escapeHtml(tr("Storage rules", "قواعد التخزين"))}</p>
-                <ul class="clean-list">
-                  <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Brand assets and program docs go to coach-assets.", "ملفات العلامة والبرامج تذهب إلى coach-assets."))}</div></li>
-                  <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Messages and private files go to message-attachments.", "الرسائل والملفات الخاصة تذهب إلى message-attachments."))}</div></li>
-                  <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Progress photos and media go to progress-media.", "صور ووسائط التقدم تذهب إلى progress-media."))}</div></li>
-                </ul>
-              </article>
-            </div>
-          `;
+              <div class="stack">
+                <form id="file-upload-form" class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Upload", "رفع"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Store files in the right bucket", "احفظ الملفات في الحاوية المناسبة"))}</h3>
+                  <div class="field-grid">
+                    <div class="field"><label>${escapeHtml(tr("Bucket", "الحاوية"))}</label><select class="select" name="bucket"><option value="coach-assets">${escapeHtml(tr("Coach assets", "ملفات المدرب"))}</option>${currentRole() === "client" ? `<option value="progress-media">${escapeHtml(tr("Progress media", "وسائط التقدم"))}</option>` : ""}</select></div>
+                    <div class="field"><label>${escapeHtml(tr("File", "الملف"))}</label><input class="input" type="file" name="file" required /></div>
+                  </div>
+                  <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Optional note", "ملاحظة اختيارية"))}</label><input class="input" type="text" name="note" /></div>
+                  <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Upload file", "رفع الملف"))}</button></div>
+                </form>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Storage rules", "قواعد التخزين"))}</p>
+                  <ul class="clean-list">
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Brand files and program documents save under workspace-safe coach-assets paths.", "ملفات العلامة والبرامج تُحفظ في مسارات آمنة داخل coach-assets."))}</div></li>
+                    ${currentRole() === "client" ? `<li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Your progress uploads are written to progress-media and logged in the database.", "يتم حفظ وسائط تقدمك في progress-media وتسجيلها داخل قاعدة البيانات."))}</div></li>` : ""}
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Private message attachments are reserved for message threads and should be uploaded from the conversation flow.", "مرفقات الرسائل الخاصة مخصصة للمحادثات ويجب رفعها من مسار المحادثة."))}</div></li>
+                  </ul>
+                </article>
+              </div>
+            `;
         }
 
         function renderAnalytics(data) {
@@ -2221,27 +2216,30 @@
         }
 
         function renderAdminSupport(data) {
+          const queue = data.queue || [];
+          const activation = queue.filter((row) => row.queue_type === "activation_request");
+          const incidents = queue.filter((row) => row.queue_type === "incident");
+          const recovery = queue.filter((row) => row.queue_type === "recovery_marker" || row.queue_type === "escalation_flag" || row.queue_type === "trainer_queue");
           return `
-            <div class="stack">
-              <section class="three-up">
-                <article class="card"><p class="card-kicker">${escapeHtml(tr("Activation", "التفعيل"))}</p><h3 class="card-title">${escapeHtml(formatNumber((data.activation || []).length))}</h3><p class="body-copy">${escapeHtml(tr("Recent manual activation requests.", "طلبات التفعيل اليدوي الأخيرة."))}</p></article>
-                <article class="card"><p class="card-kicker">${escapeHtml(tr("Incidents", "الحوادث"))}</p><h3 class="card-title">${escapeHtml(formatNumber((data.incidents || []).length))}</h3><p class="body-copy">${escapeHtml(tr("Incident visibility for recovery work.", "رؤية الحوادث لأعمال الاسترداد."))}</p></article>
-                <article class="card"><p class="card-kicker">${escapeHtml(tr("Recovery", "الاسترداد"))}</p><h3 class="card-title">${escapeHtml(formatNumber((data.recovery || []).length))}</h3><p class="body-copy">${escapeHtml(tr("Open recovery markers and rescue actions.", "علامات الاسترداد وإجراءات الإنقاذ المفتوحة."))}</p></article>
-              </section>
-              <section class="split-grid">
-                <article class="card">
-                  <p class="card-kicker">${escapeHtml(tr("Activation requests", "طلبات التفعيل"))}</p>
-                  ${dataTable([tr("Email", "البريد"), tr("Kind", "النوع"), tr("Status", "الحالة")], (data.activation || []).map((row) => `<tr><td>${escapeHtml(row.requested_email)}</td><td>${escapeHtml(row.request_kind)}</td><td>${statusPill(row.status)}</td></tr>`))}
-                </article>
-                <article class="card">
-                  <p class="card-kicker">${escapeHtml(tr("Incidents & recovery", "الحوادث والاسترداد"))}</p>
-                  <div class="stack">
-                    ${(data.incidents || []).slice(0, 6).map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(row.incident_type)}</strong><span class="mini-badge">${escapeHtml(row.severity)}</span></div><p class="timeline-copy">${escapeHtml(row.summary)}</p></article>`).join("")}
-                    ${(data.recovery || []).slice(0, 6).map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(row.marker_type)}</strong>${statusPill(row.status)}</div><p class="timeline-copy">${escapeHtml(JSON.stringify(row.metadata || {}))}</p></article>`).join("")}
-                  </div>
-                </article>
-              </section>
-            </div>
+              <div class="stack">
+                <section class="three-up">
+                  <article class="card"><p class="card-kicker">${escapeHtml(tr("Activation", "التفعيل"))}</p><h3 class="card-title">${escapeHtml(formatNumber(activation.length))}</h3><p class="body-copy">${escapeHtml(tr("Recent manual activation requests.", "طلبات التفعيل اليدوي الأخيرة."))}</p></article>
+                  <article class="card"><p class="card-kicker">${escapeHtml(tr("Incidents", "الحوادث"))}</p><h3 class="card-title">${escapeHtml(formatNumber(incidents.length))}</h3><p class="body-copy">${escapeHtml(tr("Incident visibility for recovery work.", "رؤية الحوادث لأعمال الاسترداد."))}</p></article>
+                  <article class="card"><p class="card-kicker">${escapeHtml(tr("Recovery", "الاسترداد"))}</p><h3 class="card-title">${escapeHtml(formatNumber(recovery.length))}</h3><p class="body-copy">${escapeHtml(tr("Open recovery markers and rescue actions.", "علامات الاسترداد وإجراءات الإنقاذ المفتوحة."))}</p></article>
+                </section>
+                <section class="split-grid">
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Activation requests", "طلبات التفعيل"))}</p>
+                    ${dataTable([tr("Contact", "جهة التواصل"), tr("Kind", "النوع"), tr("Status", "الحالة")], activation.map((row) => `<tr><td>${escapeHtml(row.contact_ref || row.summary || "-")}</td><td>${escapeHtml(row.title || "-")}</td><td>${statusPill(row.status)}</td></tr>`))}
+                  </article>
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Ops queue", "طابور العمليات"))}</p>
+                    <div class="stack">
+                      ${queue.slice(0, 10).map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(row.title || row.queue_type)}</strong>${statusPill(row.status)}</div><p class="timeline-copy">${escapeHtml(row.summary || row.queue_type)}</p><div class="meta">${escapeHtml(formatDate(row.created_at, { dateStyle: "medium", timeStyle: "short" }))}${row.priority ? ` • ${escapeHtml(row.priority)}` : ""}</div></article>`).join("")}
+                    </div>
+                  </article>
+                </section>
+              </div>
           `;
         }
 
@@ -2694,17 +2692,46 @@
           }
 
           if (form.id === "file-upload-form") {
-            await runTask(tr("Uploading file", "رفع الملف"), async () => {
-              const file = formData.get("file");
-              if (!(file instanceof File) || !file.name) throw new Error(tr("Choose a file first", "اختر ملفًا أولًا"));
-              const bucket = String(formData.get("bucket") || "coach-assets");
-              const path = `${currentOrgId() || "public"}/${state.user?.id || "anon"}/${Date.now()}-${sanitizeFileName(file.name)}`;
-              await uploadObject(bucket, path, file);
-              toast(`${tr("Uploaded to", "تم الرفع إلى")} ${bucket}/${path}`, "success");
-              form.reset();
-            });
-            return;
-          }
+              await runTask(tr("Uploading file", "رفع الملف"), async () => {
+                const file = formData.get("file");
+                if (!(file instanceof File) || !file.name) throw new Error(tr("Choose a file first", "اختر ملفًا أولًا"));
+                const bucket = String(formData.get("bucket") || "coach-assets");
+                const note = String(formData.get("note") || "").trim();
+                const safeName = `${Date.now()}-${sanitizeFileName(file.name)}`;
+                let path = "";
+
+                if (bucket === "coach-assets") {
+                  path = currentRole() === "trainer" || currentRole() === "admin"
+                    ? `organizations/${currentOrgId()}/files/${state.user?.id || "anon"}/${safeName}`
+                    : `profiles/${state.user?.id || "anon"}/files/${safeName}`;
+                } else if (bucket === "progress-media") {
+                  if (currentRole() !== "client" || !currentOrgId()) {
+                    throw new Error(tr("Progress media uploads are only available from a client account linked to a workspace.", "رفع وسائط التقدم متاح فقط من حساب عميل مرتبط بمساحة عمل."));
+                  }
+                  path = `organizations/${currentOrgId()}/clients/${state.user.id}/${safeName}`;
+                } else {
+                  throw new Error(tr("Use the message composer for private attachments.", "استخدم نافذة المحادثة لرفع المرفقات الخاصة."));
+                }
+
+                const storedPath = await uploadObject(bucket, path, file);
+
+                if (bucket === "progress-media") {
+                  await restInsert("progress_media", {
+                    organization_id: currentOrgId(),
+                    client_user_id: state.user.id,
+                    media_type: file.type.startsWith("video/") ? "video" : "photo",
+                    storage_bucket: bucket,
+                    storage_path: storedPath,
+                    caption: note || null,
+                    uploaded_by_user_id: state.user.id,
+                  }, { select: "id", single: true });
+                }
+
+                toast(`${tr("Uploaded to", "تم الرفع إلى")} ${bucket}/${storedPath}`, "success");
+                form.reset();
+              });
+              return;
+            }
 
           if (form.id === "access-request-form") {
             await runTask(tr("Sending access request", "إرسال طلب الوصول"), async () => {
