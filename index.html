@@ -366,6 +366,7 @@
           session: "grindctrl:session",
           bootstrap: "grindctrl:pending-bootstrap",
           invite: "grindctrl:invite-token",
+          pendingEmail: "grindctrl:pending-email",
         };
 
         const NAV = {
@@ -549,6 +550,9 @@
         function writeJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
         function writeString(key, value) { localStorage.setItem(key, value); }
         function removeStorage(key) { localStorage.removeItem(key); }
+        function rememberPendingEmail(email) {
+          if (validateEmail(email)) writeString(STORAGE_KEYS.pendingEmail, email.trim().toLowerCase());
+        }
         function isArabic() { return state.language === "ar"; }
         function tr(en, ar) { return isArabic() ? ar : en; }
         function escapeHtml(value) {
@@ -767,6 +771,7 @@
             token_type: data.token_type,
           };
           writeJson(STORAGE_KEYS.session, state.session);
+          removeStorage(STORAGE_KEYS.pendingEmail);
         }
 
         function clearSession() {
@@ -1591,12 +1596,13 @@
 
         function renderVerifyPage() {
           const hasSession = Boolean(state.session?.access_token);
+          const pendingEmail = readString(STORAGE_KEYS.pendingEmail, "");
           return renderAuthLayout(
             tr("Verify", "تحقق"),
             hasSession ? tr("Verification complete", "اكتمل التحقق") : tr("Verify your email", "تحقق من بريدك"),
             hasSession
               ? tr("Your session is live. Continue into the correct journey based on your role and pending bootstrap state.", "جلستك أصبحت نشطة. تابع إلى المسار الصحيح حسب دورك وحالة التهيئة المعلقة.")
-              : tr("If your email link opened without creating a session automatically, enter the one-time code here.", "إذا فُتح رابط البريد دون إنشاء جلسة تلقائيًا، أدخل الرمز لمرة واحدة هنا."),
+              : tr("Password signup usually sends a confirmation email link. If your email contains a one-time code instead, enter it here. If nothing arrives, send yourself a fresh magic link below.", "تسجيل كلمة المرور يرسل عادةً رابط تأكيد إلى البريد. إذا احتوى البريد على رمز لمرة واحدة فأدخله هنا. وإذا لم يصلك شيء فأرسل لنفسك رابطًا جديدًا بالأسفل."),
             hasSession
               ? `
                 <div class="card">
@@ -1607,13 +1613,21 @@
                 </div>
               `
               : `
-                <form id="verify-form" class="card">
-                  <div class="field-grid">
-                    <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" required /></div>
-                    <div class="field"><label>${escapeHtml(tr("Verification code", "رمز التحقق"))}</label><input class="input" type="text" name="token" required /></div>
-                  </div>
-                  <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Verify email", "تحقق من البريد"))}</button></div>
-                </form>
+                <div class="stack">
+                  <div class="notice-strip">${icon("mail")}<div><strong>${escapeHtml(tr("Expect a link first", "توقع رابطًا أولًا"))}</strong><p class="body-copy">${escapeHtml(tr("Supabase password signup sends a confirmation email by default. The code field below only applies if the email actually contains a code.", "إعداد Supabase الافتراضي لتسجيل كلمة المرور يرسل رسالة تأكيد بالبريد. حقل الرمز بالأسفل يُستخدم فقط إذا احتوى البريد فعليًا على رمز."))}</p></div></div>
+                  <form id="verify-form" class="card">
+                    <div class="field-grid">
+                      <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" value="${escapeHtml(pendingEmail)}" required /></div>
+                      <div class="field"><label>${escapeHtml(tr("Verification code", "رمز التحقق"))}</label><input class="input" type="text" name="token" required /></div>
+                    </div>
+                    <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Verify email", "تحقق من البريد"))}</button></div>
+                  </form>
+                  <form id="verify-magic-form" class="card">
+                    <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" value="${escapeHtml(pendingEmail)}" required /></div>
+                    <p class="body-copy">${escapeHtml(tr("Use this if you did not receive anything after signup, or if you want a fresh sign-in link sent to the same address.", "استخدم هذا إذا لم يصلك شيء بعد التسجيل، أو إذا أردت إرسال رابط دخول جديد إلى نفس العنوان."))}</p>
+                    <div class="form-actions" style="margin-top:18px;"><button class="btn btn-secondary" type="submit">${escapeHtml(tr("Send magic link", "إرسال رابط الدخول"))}</button></div>
+                  </form>
+                </div>
               `,
           );
         }
@@ -2478,6 +2492,7 @@
             await runTask(tr("Sending magic link", "إرسال الرابط"), async () => {
               const email = String(formData.get("email") || "").trim().toLowerCase();
               if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
+              rememberPendingEmail(email);
               const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
               if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
               await signInWithMagicLink(email);
@@ -2495,6 +2510,7 @@
               const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
               if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
               if (!validatePassword(password)) throw new Error(tr("Password must be at least 8 characters", "يجب أن تكون كلمة المرور 8 أحرف على الأقل"));
+              rememberPendingEmail(email);
               if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
               if (accountType === "trainer") {
                 writeJson(STORAGE_KEYS.bootstrap, {
@@ -2531,7 +2547,7 @@
                 language,
               });
               if (result?.access_token) saveSession(result);
-              toast(tr("Account created. Verify your email to continue.", "تم إنشاء الحساب. تحقق من بريدك للمتابعة."), "success");
+              toast(tr("Account created. Check your email for the confirmation link. If the email contains a code instead, enter it on the next screen.", "تم إنشاء الحساب. تحقق من بريدك لرابط التأكيد. وإذا احتوى البريد على رمز بدلًا من ذلك فأدخله في الشاشة التالية."), "success");
               window.location.hash = pathToHash("/verify");
             });
             return;
@@ -2539,10 +2555,23 @@
 
           if (form.id === "verify-form") {
             await runTask(tr("Verifying email", "التحقق من البريد"), async () => {
-              await verifyEmailOtp(String(formData.get("email") || "").trim(), String(formData.get("token") || "").trim());
+              const email = String(formData.get("email") || "").trim().toLowerCase();
+              rememberPendingEmail(email);
+              await verifyEmailOtp(email, String(formData.get("token") || "").trim());
               await refreshCurrentRoute(true);
               const inviteToken = readString(STORAGE_KEYS.invite, "");
               window.location.hash = inviteToken ? pathToHash(`/invite?token=${encodeURIComponent(inviteToken)}`) : pathToHash(defaultAppRoute());
+            });
+            return;
+          }
+
+          if (form.id === "verify-magic-form") {
+            await runTask(tr("Sending magic link", "إرسال الرابط"), async () => {
+              const email = String(formData.get("email") || "").trim().toLowerCase();
+              if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
+              rememberPendingEmail(email);
+              await signInWithMagicLink(email);
+              toast(tr("Magic link sent. Check your inbox and spam folder.", "تم إرسال رابط الدخول. تحقق من الوارد والبريد المزعج."), "success");
             });
             return;
           }
