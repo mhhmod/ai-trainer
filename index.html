@@ -82,6 +82,7 @@
           var(--bg);
         color: var(--text);
         overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
       }
 
       body::before {
@@ -100,6 +101,14 @@
       a { color: inherit; text-decoration: none; }
       button, input, textarea, select { font: inherit; }
       button { cursor: pointer; }
+
+      a,
+      button,
+      input,
+      select,
+      textarea {
+        -webkit-tap-highlight-color: transparent;
+      }
 
       .shell { position: relative; min-height: 100vh; }
       .container { width: min(var(--content), calc(100vw - 32px)); margin-inline: auto; }
@@ -126,6 +135,7 @@
       .topbar-actions, .nav-pills, .hero-cta, .form-actions, .tag-row, .subnav {
         display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
       }
+      .topbar-actions { min-width: 0; flex: 1 1 0; justify-content: flex-end; }
       .nav-pills { justify-content: center; }
 
       .brand { display: inline-flex; align-items: center; gap: 14px; min-width: 0; }
@@ -171,7 +181,7 @@
       .pill, .badge, .mini-badge {
         display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: rgba(255,255,255,0.02); color: var(--muted);
       }
-      .pill { padding: 10px 14px; min-height: 42px; }
+      .pill { padding: 10px 14px; min-height: 46px; }
       .pill.is-active { color: var(--text); border-color: rgba(42,92,255,0.42); background: linear-gradient(180deg, rgba(42,92,255,0.18), rgba(42,92,255,0.1)); }
       .mini-badge { padding: 6px 10px; font-size: 12px; }
       .badge { padding: 8px 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; }
@@ -186,6 +196,15 @@
       .btn-ghost { color: var(--muted); background: transparent; border-color: var(--line); }
       .btn-danger { color: white; background: linear-gradient(180deg, #e45068, #bf3454); border-color: rgba(255,106,120,0.35); }
       .btn[disabled] { opacity: 0.52; cursor: not-allowed; transform: none; }
+
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid rgba(122, 166, 255, 0.82);
+        outline-offset: 3px;
+      }
 
       .input, .select, .textarea {
         width: 100%; min-height: 48px; border-radius: 16px; border: 1px solid var(--line);
@@ -224,7 +243,12 @@
       .hero-stat strong { display: block; font-family: var(--heading); font-size: 28px; }
       .hero-stat span { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; }
 
-      .table-wrap { overflow: auto; border-radius: 18px; }
+      .table-wrap {
+        overflow: auto;
+        border-radius: 18px;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+      }
       table { width: 100%; border-collapse: collapse; min-width: 680px; }
       th, td { padding: 14px 16px; border-bottom: 1px solid var(--line); text-align: start; vertical-align: top; }
       tr:last-child td { border-bottom: 0; }
@@ -257,6 +281,27 @@
       .testimonial footer { margin-top: 20px; color: var(--muted); }
       .footer { padding: 18px 0 32px; color: var(--faint); }
       .footer-line { padding-top: 18px; border-top: 1px solid var(--line); }
+
+      html[lang="ar"] .brand-title,
+      html[lang="ar"] .headline,
+      html[lang="ar"] .section-title,
+      html[lang="ar"] .page-title,
+      html[lang="ar"] .card-title,
+      html[lang="ar"] .metric-value,
+      html[lang="ar"] .kpi-value,
+      html[lang="ar"] .price strong {
+        font-family: var(--body);
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1.2;
+      }
+
+      html[lang="ar"] .eyebrow,
+      html[lang="ar"] .card-kicker,
+      html[lang="ar"] .kpi-label,
+      html[lang="ar"] th {
+        letter-spacing: 0.04em;
+      }
 
       .badge.success,
       .status-pill.status-active_manual,
@@ -309,6 +354,33 @@
         .kpi-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+
+        .sidebar {
+          gap: 14px;
+          padding: 18px;
+        }
+
+        .sidebar nav.stack {
+          grid-auto-flow: column;
+          grid-auto-columns: max-content;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 4px;
+          overscroll-behavior-x: contain;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .sidebar nav.stack .pill {
+          white-space: nowrap;
+        }
+
+        .sidebar nav.stack::-webkit-scrollbar {
+          display: none;
+        }
+
+        .message-shell {
+          gap: 14px;
+        }
       }
 
       @media (max-width: 840px) {
@@ -333,11 +405,114 @@
         .topbar-inner {
           align-items: flex-start;
           flex-direction: column;
+          gap: 14px;
         }
 
         .topbar-actions {
           width: 100%;
-          justify-content: space-between;
+          display: grid;
+          gap: 12px;
+          justify-content: stretch;
+        }
+
+        .topbar-actions > .nav-pills {
+          justify-content: flex-start;
+        }
+
+        .topbar-actions > .nav-pills:first-child {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          overflow-y: hidden;
+          width: 100%;
+          padding-bottom: 4px;
+          margin-inline: -2px;
+          scroll-snap-type: x proximity;
+          overscroll-behavior-x: contain;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .topbar-actions > .nav-pills:first-child > * {
+          white-space: nowrap;
+          scroll-snap-align: start;
+        }
+
+        .topbar-actions > .nav-pills:first-child::-webkit-scrollbar {
+          display: none;
+        }
+
+        .topbar-actions > .nav-pills:last-child {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          width: 100%;
+        }
+
+        .topbar-actions > .nav-pills:last-child > * {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .page-shell {
+          padding: 24px 0 44px;
+        }
+
+        .card,
+        .panel,
+        .auth-card,
+        .sidebar,
+        .hero-card,
+        .hero-panel {
+          padding: 18px;
+        }
+
+        th,
+        td {
+          padding: 12px 14px;
+          font-size: 14px;
+        }
+
+        table {
+          min-width: 560px;
+        }
+
+        .thread-list {
+          grid-auto-flow: column;
+          grid-auto-columns: minmax(220px, 76vw);
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 4px;
+          overscroll-behavior-x: contain;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .thread-list::-webkit-scrollbar {
+          display: none;
+        }
+
+        .bubble {
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .container {
+          width: min(var(--content), calc(100vw - 24px));
+        }
+
+        .hero {
+          padding-top: 28px;
+        }
+
+        .headline {
+          max-width: none;
+        }
+
+        .table-wrap {
+          margin-inline: -8px;
+          padding-inline: 8px 0;
+        }
+
+        table {
+          min-width: 480px;
         }
       }
 
@@ -368,6 +543,8 @@
           bootstrap: "grindctrl:pending-bootstrap",
           invite: "grindctrl:invite-token",
           pendingEmail: "grindctrl:pending-email",
+          cookieConsent: "grindctrl:cookie-consent",
+          savedViews: "grindctrl:saved-views",
         };
 
         const NAV = {
@@ -507,6 +684,102 @@
           },
         ];
 
+        const PUBLIC_FALLBACK_PACKAGES = [
+          {
+            code: "solo_coach",
+            name_en: "Solo Coach",
+            name_ar: "سولو كوتش",
+            description_en: "Launch with one premium workspace, essential tracking, and manual activation.",
+            description_ar: "ابدأ بمساحة عمل احترافية واحدة مع المتابعة الأساسية وتفعيل يدوي واضح.",
+            billing_interval: "monthly",
+            amount_cents: 7900,
+            currency_code: "USD",
+            trial_days: 7,
+          },
+          {
+            code: "pro_coach",
+            name_en: "Pro Coach",
+            name_ar: "برو كوتش",
+            description_en: "More clients, analytics, staff invites, and a sharper operational layer.",
+            description_ar: "لعدد أكبر من العملاء مع تحليلات أفضل ودعوات للفريق وتشغيل أكثر تنظيمًا.",
+            billing_interval: "monthly",
+            amount_cents: 14900,
+            currency_code: "USD",
+            trial_days: 7,
+          },
+          {
+            code: "gym_studio",
+            name_en: "Gym / Studio",
+            name_ar: "نادي / ستوديو",
+            description_en: "A larger workspace footprint for multi-coach operations and controlled access.",
+            description_ar: "مساحة أكبر لتشغيل عدة مدربين مع تحكم أوضح في الوصول والصلاحيات.",
+            billing_interval: "monthly",
+            amount_cents: 29900,
+            currency_code: "USD",
+            trial_days: 7,
+          },
+        ];
+
+        const PUBLIC_TESTIMONIALS = [
+          {
+            en: "GrindCTRL replaced scattered Telegram notes with one clear operating system. My client follow-up became faster and more consistent within the first week.",
+            ar: "استبدل GrindCTRL فوضى الملاحظات المتفرقة في تيليجرام بنظام تشغيل واضح. متابعة العملاء أصبحت أسرع وأكثر اتساقًا من أول أسبوع.",
+            name_en: "Nour A.",
+            name_ar: "نور أ.",
+            role_en: "Online Coach",
+            role_ar: "مدرب أونلاين",
+          },
+          {
+            en: "Clients stopped asking what to do next. The home screen made the next action obvious, and check-ins finally felt structured instead of improvised.",
+            ar: "العملاء توقفوا عن سؤالنا عن الخطوة التالية. الشاشة الرئيسية جعلت الإجراء القادم واضحًا، والمتابعات أصبحت منظمة بدلًا من أن تكون ارتجالية.",
+            name_en: "Yousef M.",
+            name_ar: "يوسف م.",
+            role_en: "Studio Owner",
+            role_ar: "مالك ستوديو",
+          },
+          {
+            en: "The bilingual polish matters. Arabic feels native, not bolted on, and that changed how confidently we could onboard local clients.",
+            ar: "الاهتمام الحقيقي باللغتين مهم. العربية تبدو أصيلة وليست إضافة متأخرة، وهذا غيّر ثقتنا في ضم العملاء المحليين.",
+            name_en: "Salma K.",
+            name_ar: "سلمى ك.",
+            role_en: "Women's Fitness Coach",
+            role_ar: "مدربة لياقة نسائية",
+          },
+        ];
+
+        const PUBLIC_FAQS = [
+          {
+            en_q: "Do I need a payment gateway to launch?",
+            ar_q: "هل أحتاج بوابة دفع عند الإطلاق؟",
+            en_a: "No. GrindCTRL is built for manual activation first, with provider-agnostic access states so online billing can be added later without rewriting the product.",
+            ar_a: "لا. GrindCTRL مصمم للتفعيل اليدوي أولًا، مع حالات وصول مستقلة عن مزود الدفع حتى يمكن إضافة الدفع الإلكتروني لاحقًا بدون إعادة بناء المنتج.",
+          },
+          {
+            en_q: "Can standalone clients use the app without a trainer?",
+            ar_q: "هل يمكن للعميل استخدام التطبيق بدون مدرب؟",
+            en_a: "Yes. Standalone clients can create a personal workspace, follow a guided onboarding flow, and later join a trainer through an invite.",
+            ar_a: "نعم. يمكن للعميل إنشاء مساحة شخصية، واتباع مسار تهيئة موجه، ثم الانضمام لاحقًا إلى مدرب عبر دعوة.",
+          },
+          {
+            en_q: "Is Telegram still supported?",
+            ar_q: "هل ما زال تيليجرام مدعومًا؟",
+            en_a: "Yes as a legacy and automation channel. The core experience is web-first, but the compatibility layer preserves existing Telegram-oriented workflows.",
+            ar_a: "نعم، كقناة قديمة وللأتمتة. التجربة الأساسية أصبحت ويب أولًا، لكن طبقة التوافق تحافظ على التدفقات الحالية المبنية على تيليجرام.",
+          },
+          {
+            en_q: "What happens when access expires?",
+            ar_q: "ماذا يحدث عند انتهاء الوصول؟",
+            en_a: "The workspace can move into a read-only grace state. Data remains preserved while premium actions stay restricted until reactivation.",
+            ar_a: "يمكن أن تنتقل مساحة العمل إلى وضع سماح للقراءة فقط. تبقى البيانات محفوظة بينما تظل الإجراءات المميزة مقيدة حتى إعادة التفعيل.",
+          },
+          {
+            en_q: "Do Arabic and RTL really affect the full interface?",
+            ar_q: "هل العربية وRTL مطبقان على الواجهة كاملة؟",
+            en_a: "Yes. Navigation, forms, layout rhythm, labels, system feedback, and dashboards all switch direction and language together.",
+            ar_a: "نعم. التنقل، والنماذج، وإيقاع التخطيط، والعناوين، والتنبيهات، ولوحات المتابعة كلها تنتقل مع اللغة والاتجاه معًا.",
+          },
+        ];
+
         const state = {
           theme: readString(STORAGE_KEYS.theme, "night"),
           language: readString(STORAGE_KEYS.language, "en"),
@@ -522,9 +795,15 @@
           adminScopes: [],
           organization: null,
           workspaceAccess: null,
+          entitlements: [],
           notificationPreferences: null,
           views: {},
-          ui: { selectedThreadId: null, qaResults: [] },
+          ui: {
+            selectedThreadId: null,
+            qaResults: [],
+            savedViews: readJson(STORAGE_KEYS.savedViews, {}),
+            cookieConsent: readJson(STORAGE_KEYS.cookieConsent, { analytics: false, updatedAt: null }),
+          },
           realtime: { socket: null, topic: null, heartbeat: null, ref: 1 },
         };
 
@@ -551,13 +830,85 @@
         function writeJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
         function writeString(key, value) { localStorage.setItem(key, value); }
         function removeStorage(key) { localStorage.removeItem(key); }
+        function normalizeEmail(value) { return String(value || "").trim().toLowerCase(); }
         function rememberPendingEmail(email) {
-          if (validateEmail(email)) writeString(STORAGE_KEYS.pendingEmail, email.trim().toLowerCase());
+          const normalized = normalizeEmail(email);
+          if (validateEmail(normalized)) writeString(STORAGE_KEYS.pendingEmail, normalized);
         }
+        function readPendingBootstrap() {
+          const pending = readJson(STORAGE_KEYS.bootstrap, null);
+          if (!pending || typeof pending !== "object" || !pending.kind || !pending.payload) return null;
+          return {
+            kind: String(pending.kind),
+            email: normalizeEmail(pending.email),
+            createdAt: pending.createdAt || null,
+            payload: pending.payload,
+          };
+        }
+        function writePendingBootstrap(value) {
+          if (!value) {
+            removeStorage(STORAGE_KEYS.bootstrap);
+            return;
+          }
+          writeJson(STORAGE_KEYS.bootstrap, {
+            kind: String(value.kind || ""),
+            email: normalizeEmail(value.email),
+            createdAt: value.createdAt || new Date().toISOString(),
+            payload: value.payload || {},
+          });
+        }
+        function readInviteState() {
+          try {
+            const raw = localStorage.getItem(STORAGE_KEYS.invite);
+            if (!raw) return null;
+            try {
+              const parsed = JSON.parse(raw);
+              if (parsed && typeof parsed === "object") {
+                return {
+                  token: String(parsed.token || "").trim(),
+                  email: normalizeEmail(parsed.email),
+                  createdAt: parsed.createdAt || null,
+                };
+              }
+            } catch (_) {}
+            return { token: String(raw).trim(), email: "", createdAt: null };
+          } catch (_) {
+            return null;
+          }
+        }
+        function currentInviteToken() { return readInviteState()?.token || ""; }
+        function saveInviteToken(token, email = "") {
+          const cleanedToken = String(token || "").trim();
+          if (!cleanedToken) {
+            removeStorage(STORAGE_KEYS.invite);
+            return;
+          }
+          const current = readInviteState();
+          writeJson(STORAGE_KEYS.invite, {
+            token: cleanedToken,
+            email: normalizeEmail(email) || current?.email || "",
+            createdAt: current?.createdAt || new Date().toISOString(),
+          });
+        }
+        function clearInviteToken() { removeStorage(STORAGE_KEYS.invite); }
+        function currentUserEmail() { return normalizeEmail(state.user?.email); }
         function isArabic() { return state.language === "ar"; }
-        function tr(en, ar) { return isArabic() ? ar : en; }
+        function looksMojibake(value) {
+          return /[ØÙÃÂâ€]/.test(String(value || ""));
+        }
+        function repairText(value) {
+          const input = String(value ?? "");
+          if (!input || !looksMojibake(input)) return input;
+          try {
+            const bytes = Uint8Array.from(input, (char) => char.charCodeAt(0) & 0xff);
+            return new TextDecoder("utf-8").decode(bytes);
+          } catch (_) {
+            return input;
+          }
+        }
+        function tr(en, ar) { return repairText(isArabic() ? ar : en); }
         function escapeHtml(value) {
-          return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+          return repairText(String(value ?? "")).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
         }
         function pathToHash(path, query) {
           const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -584,28 +935,40 @@
           return { path: path.startsWith("/") ? path : `/${path}`, query: new URLSearchParams(qs) };
         }
 
+        function hasAdminScope() {
+          return state.adminScopes.some((row) => row.status === "active");
+        }
+
+        function hasTrainerMembership() {
+          return state.memberships.some((row) => row.status === "active" && (row.role === "admin" || row.role === "trainer"));
+        }
+
+        function hasClientProfile() {
+          return Boolean(state.clientProfile);
+        }
+
         function currentRole() {
-          const hasAdminScope = state.adminScopes.some((row) => row.status === "active");
-          const hasTrainerRole = state.memberships.some((row) => row.status === "active" && (row.role === "admin" || row.role === "trainer"));
-          if (hasAdminScope || state.profile?.default_role === "admin") return "admin";
-          if (hasTrainerRole) return "trainer";
-          return state.clientProfile ? "client" : state.profile?.default_role || null;
+          if (hasAdminScope()) return "admin";
+          if (hasTrainerMembership()) return "trainer";
+          if (hasClientProfile()) return "client";
+          return null;
         }
 
         function defaultAppRoute() {
           const role = currentRole();
           if (role === "admin") return "/app/admin/overview";
           if (role === "trainer") return "/app/trainer/dashboard";
-          return "/app/client/home";
+          if (role === "client") return "/app/client/home";
+          const inviteToken = currentInviteToken();
+          return inviteToken ? `/invite?token=${encodeURIComponent(inviteToken)}` : "/verify";
         }
 
         function canAccessRoute(path) {
-          const role = currentRole();
           if (!path.startsWith("/app/")) return true;
           if (!state.session) return false;
-          if (path.startsWith("/app/admin/")) return role === "admin";
-          if (path.startsWith("/app/trainer/")) return role === "trainer";
-          if (path.startsWith("/app/client/")) return role === "client" || role === "trainer";
+          if (path.startsWith("/app/admin/")) return hasAdminScope();
+          if (path.startsWith("/app/trainer/")) return hasTrainerMembership();
+          if (path.startsWith("/app/client/")) return hasClientProfile();
           return false;
         }
 
@@ -622,10 +985,38 @@
           return ["grace_read_only", "expired", "cancelled"].includes(state.workspaceAccess?.status);
         }
 
-        function formatMoney(amountCents, currency = "USD") {
+        function entitlement(featureKey) {
+          return (state.entitlements || []).find((row) => row.feature_key === featureKey) || null;
+        }
+
+        function hasEntitlement(featureKey) {
+          const row = entitlement(featureKey);
+          if (!row) return true;
+          return Boolean(row.enabled);
+        }
+
+        function legacyRequireWriteAccess(featureKey = null) {
+          if (isReadOnlyWorkspace()) {
+            throw new Error(tr("This workspace is currently read-only. Request reactivation or a package update to continue editing.", "هذه المساحة في وضع القراءة فقط الآن. اطلب إعادة التفعيل أو تحديث الباقة للمتابعة."));
+          }
+          if (featureKey && !hasEntitlement(featureKey)) {
+            throw new Error(tr("This action is not included in the current package yet.", "هذا الإجراء غير متاح في الباقة الحالية بعد."));
+          }
+        }
+
+        function requireWriteAccess(featureKey = null) {
+          if (isReadOnlyWorkspace()) {
+            throw new Error(tr("This workspace is currently read-only. Request reactivation or a package update before editing again.", "مساحة العمل هذه في وضع القراءة فقط الآن. اطلب إعادة التفعيل أو تحديث الباقة قبل تعديل أي شيء."));
+          }
+          if (featureKey && !hasEntitlement(featureKey)) {
+            throw new Error(tr("This action is not included in the current package yet.", "هذا الإجراء غير متاح في الباقة الحالية بعد."));
+          }
+        }
+
+        function formatMoney(amountCents, currency = state.organization?.currency_code || "EGP") {
           const amount = Number(amountCents || 0) / 100;
           try {
-            return new Intl.NumberFormat(isArabic() ? "ar" : "en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
+            return new Intl.NumberFormat(isArabic() ? "ar-EG" : "en-EG", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
           } catch (_) {
             return `${amount} ${currency}`;
           }
@@ -643,6 +1034,38 @@
         function formatNumber(value) {
           try { return new Intl.NumberFormat(isArabic() ? "ar" : "en-US").format(Number(value || 0)); }
           catch (_) { return String(value ?? 0); }
+        }
+
+        function routeMeta(path = state.route.path) {
+          const registry = {
+            "/home": {
+              title: tr("GrindCTRL AI Trainer | Start Training Smarter", "GrindCTRL AI Trainer | ابدأ التدريب بذكاء أكبر"),
+              description: tr("A premium bilingual coaching platform for trainers, gyms, and clients across onboarding, plans, check-ins, progress, communication, and access.", "منصة تدريب احترافية ثنائية اللغة للمدربين والأندية والعملاء عبر التهيئة والخطط والتقييمات والتقدم والتواصل والوصول."),
+            },
+            "/trainers": {
+              title: tr("For Trainers | GrindCTRL AI Trainer", "للمدربين | GrindCTRL AI Trainer"),
+              description: tr("Run a premium coaching workspace with clearer client follow-up, programs, check-ins, files, and package-aware access control.", "أدر مساحة تدريب احترافية بمتابعة أوضح للعملاء والبرامج والتقييمات والملفات والتحكم في الوصول حسب الباقة."),
+            },
+            "/clients": {
+              title: tr("For Clients | GrindCTRL AI Trainer", "للعملاء | GrindCTRL AI Trainer"),
+              description: tr("Give clients one clear next step, structured check-ins, progress visibility, and a smoother trainer-linked journey.", "امنح العملاء خطوة تالية واضحة وتقييمات منظمة ووضوحًا في التقدم ورحلة أسهل مع المدرب."),
+            },
+            "/packages": {
+              title: tr("Packages | GrindCTRL AI Trainer", "الباقات | GrindCTRL AI Trainer"),
+              description: tr("Compare launch packages with manual activation, clear entitlements, and provider-agnostic access architecture.", "قارن باقات الإطلاق مع تفعيل يدوي وصلاحيات واضحة وبنية وصول مستقلة عن مزود الدفع."),
+            },
+          };
+          return registry[path] || {
+            title: tr("GrindCTRL AI Trainer", "GrindCTRL AI Trainer"),
+            description: tr("Bilingual coaching SaaS for trainers, gyms, and clients.", "منصة تدريب ثنائية اللغة للمدربين والأندية والعملاء."),
+          };
+        }
+
+        function updateDocumentMeta() {
+          const meta = routeMeta();
+          document.title = repairText(meta.title);
+          const description = document.querySelector('meta[name="description"]');
+          if (description) description.setAttribute("content", repairText(meta.description));
         }
 
         function slugify(input, fallback = "workspace") {
@@ -793,27 +1216,11 @@
           state.adminScopes = [];
           state.organization = null;
           state.workspaceAccess = null;
+          state.entitlements = [];
           state.notificationPreferences = null;
           disconnectRealtime();
           removeStorage(STORAGE_KEYS.session);
-        }
-
-        async function signUpWithPassword(input) {
-          const redirect = redirectTarget("/verify");
-          return apiFetch(`/auth/v1/signup${redirect ? `?redirect_to=${encodeURIComponent(redirect)}` : ""}`, {
-            auth: false,
-            method: "POST",
-            body: {
-              email: input.email,
-              password: input.password,
-              data: {
-                display_name: input.fullName,
-                preferred_language: input.language,
-                preferred_direction: input.language === "ar" ? "rtl" : "ltr",
-                default_role: input.accountType === "trainer" ? "trainer" : "client",
-              },
-            },
-          });
+          removeStorage(STORAGE_KEYS.pendingEmail);
         }
 
         async function signUpWithOtp(input) {
@@ -916,8 +1323,13 @@
         }
 
         async function maybeRunPendingBootstrap() {
-          const pending = readJson(STORAGE_KEYS.bootstrap, null);
+          const pending = readPendingBootstrap();
           if (!pending || !state.session || !state.user) return;
+          const email = currentUserEmail();
+          if (pending.email && email && pending.email !== email) {
+            removeStorage(STORAGE_KEYS.bootstrap);
+            return;
+          }
           const alreadyTrainer = state.memberships.some((row) => row.status === "active" && (row.role === "admin" || row.role === "trainer"));
           const alreadyClient = Boolean(state.clientProfile?.organization_id);
           if ((pending.kind === "trainer" && alreadyTrainer) || (pending.kind === "client" && alreadyClient)) {
@@ -936,6 +1348,17 @@
           if (!state.session) return;
           if (state.user && state.profile && !force) return;
           await fetchCurrentUser();
+          const currentEmail = currentUserEmail();
+          const pendingBootstrap = readPendingBootstrap();
+          if (pendingBootstrap?.email && currentEmail && pendingBootstrap.email !== currentEmail) {
+            removeStorage(STORAGE_KEYS.bootstrap);
+            toast(tr("A pending signup setup was cleared because it belongs to a different email.", "تمت إزالة إعداد تسجيل معلق لأنه يخص بريداً إلكترونياً مختلفاً."), "info");
+          }
+          const inviteState = readInviteState();
+          if (inviteState?.email && currentEmail && inviteState.email !== currentEmail) {
+            clearInviteToken();
+            toast(tr("A saved invite was cleared because it belongs to a different email. Re-open the invite link to continue.", "تمت إزالة دعوة محفوظة لأنها تخص بريداً إلكترونياً مختلفاً. افتح رابط الدعوة من جديد للمتابعة."), "info");
+          }
           const [profile, memberships, clientProfile, adminScopes] = await Promise.all([
             safeSelect("user_profiles", { select: "*", filters: [{ column: "user_id", value: state.user.id }], single: true }, null),
             safeSelect("organization_memberships", { select: "*", filters: [{ column: "user_id", value: state.user.id }, { column: "status", value: "active" }], order: { column: "updated_at", ascending: false } }, []),
@@ -950,6 +1373,9 @@
           const orgId = currentOrgId();
           state.organization = orgId ? await safeSelect("organizations", { select: "*", filters: [{ column: "id", value: orgId }], single: true }, null) : null;
           state.workspaceAccess = orgId ? await safeSelect("workspace_access", { select: "*", filters: [{ column: "organization_id", value: orgId }], single: true }, null) : null;
+          state.entitlements = state.workspaceAccess?.package_code
+            ? await safeSelect("package_entitlements", { select: "*", filters: [{ column: "package_code", value: state.workspaceAccess.package_code }], order: { column: "feature_key", ascending: true }, limit: 80 }, [])
+            : [];
           state.notificationPreferences = await safeSelect("notification_preferences", { select: "*", filters: [{ column: "user_id", value: state.user.id }], single: true }, null);
           connectRealtime();
         }
@@ -1078,12 +1504,25 @@
               data = { home, clients, queue, notices };
             } else if (route === "/app/trainer/clients") {
               data = { clients: await restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 80 }) };
+            } else if (route === "/app/trainer/client") {
+              const clientUserId = state.route.query.get("client");
+              const [detail, checkins, progress] = await Promise.all([
+                clientUserId ? restSelect("v_client_detail", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], single: true }) : null,
+                clientUserId ? safeSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], order: { column: "created_at", ascending: false }, limit: 12 }, []) : [],
+                clientUserId ? safeSelect("progress_entries", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], order: { column: "recorded_at", ascending: false }, limit: 12 }, []) : [],
+              ]);
+              data = { detail, checkins, progress };
             } else if (route === "/app/trainer/programs") {
               const [clients, plans] = await Promise.all([
                 restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }),
                 restSelect("training_plans", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "updated_at", ascending: false }, limit: 50 }),
               ]);
               data = { clients, plans };
+            } else if (route === "/app/trainer/program") {
+              const planId = state.route.query.get("plan");
+              data = {
+                rows: planId ? await restSelect("v_program_detail", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "plan_id", value: planId }], order: { column: "week_number", ascending: true }, limit: 300 }) : [],
+              };
             } else if (route === "/app/trainer/checkins") {
               data = { checkins: await restSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "created_at", ascending: false }, limit: 50 }) };
             } else if (route === "/app/trainer/messages" || route === "/app/client/messages") {
@@ -1132,6 +1571,11 @@
                 safeSelect("workspace_access_requests", { select: "*", order: { column: "created_at", ascending: false }, limit: 60 }, []),
               ]);
               data = { accessRows, requests };
+            } else if (route === "/app/admin/access/request") {
+              const requestId = state.route.query.get("request");
+              const request = requestId ? await safeSelect("workspace_access_requests", { select: "*", filters: [{ column: "id", value: requestId }], single: true }, null) : null;
+              const access = request?.organization_id ? await safeSelect("workspace_access", { select: "*", filters: [{ column: "organization_id", value: request.organization_id }], single: true }, null) : null;
+              data = { request, access };
             } else if (route === "/app/admin/users") {
               const [memberships, admins] = await Promise.all([
                 safeSelect("organization_memberships", { select: "*", order: { column: "updated_at", ascending: false }, limit: 80 }, []),
@@ -1140,6 +1584,133 @@
               data = { memberships, admins };
             } else if (route === "/app/admin/support") {
               data = { queue: await safeSelect("v_admin_support_queue", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
+            } else if (route === "/app/admin/support/detail") {
+              const queueId = state.route.query.get("queue");
+              data = {
+                item: queueId ? await safeSelect("v_admin_support_queue", { select: "*", filters: [{ column: "id", value: queueId }], single: true }, null) : null,
+              };
+            } else if (route === "/app/admin/audit") {
+              data = { audit: await safeSelect("audit_log", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
+            } else if (route === "/app/admin/settings") {
+              data = { flags: await safeSelect("feature_flags", { select: "*", order: { column: "flag_key", ascending: true }, limit: 80 }, []) };
+            }
+            state.views[route] = { status: "ready", data, error: "" };
+          } catch (error) {
+            state.views[route] = { status: "error", data: null, error: error.message || "Request failed" };
+          }
+          render();
+        }
+
+        async function loadRouteData() {
+          const route = state.route.path;
+          if (!route.startsWith("/app/") || !state.session || !canAccessRoute(route)) return;
+          state.views[route] = { status: "loading", data: state.views[route]?.data || null, error: "" };
+          render();
+          try {
+            let data = null;
+            if (route === "/app/trainer/dashboard") {
+              const [home, clients, queue, notices] = await Promise.all([
+                restSelect("v_trainer_home", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "trainer_user_id", value: state.user.id }], single: true }),
+                restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "latest_snapshot_date", ascending: false, nulls: "nullslast" }, limit: 6 }),
+                safeSelect("trainer_queue", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "priority_score", ascending: false }, limit: 6 }, []),
+                safeSelect("notifications", { select: "*", filters: [{ column: "recipient_user_id", value: state.user.id }], order: { column: "created_at", ascending: false }, limit: 5 }, []),
+              ]);
+              data = { home, clients, queue, notices };
+            } else if (route === "/app/trainer/clients") {
+              data = { clients: await restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 80 }) };
+            } else if (route === "/app/trainer/client") {
+              const clientUserId = state.route.query.get("client");
+              const [detail, checkins, progress] = await Promise.all([
+                clientUserId ? restSelect("v_client_detail", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], single: true }) : null,
+                clientUserId ? safeSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], order: { column: "created_at", ascending: false }, limit: 12 }, []) : [],
+                clientUserId ? safeSelect("progress_entries", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], order: { column: "recorded_at", ascending: false }, limit: 12 }, []) : [],
+              ]);
+              data = { detail, checkins, progress };
+            } else if (route === "/app/trainer/programs") {
+              const [clients, plans] = await Promise.all([
+                restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }),
+                restSelect("training_plans", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "updated_at", ascending: false }, limit: 50 }),
+              ]);
+              data = { clients, plans };
+            } else if (route === "/app/trainer/program") {
+              const planId = state.route.query.get("plan");
+              data = {
+                rows: planId ? await restSelect("v_program_detail", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "plan_id", value: planId }], order: { column: "week_number", ascending: true }, limit: 300 }) : [],
+              };
+            } else if (route === "/app/trainer/checkins") {
+              const [checkins, clients] = await Promise.all([
+                restSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "created_at", ascending: false }, limit: 50 }),
+                restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }),
+              ]);
+              data = { checkins, clients };
+            } else if (route === "/app/trainer/messages" || route === "/app/client/messages") {
+              const threadFilters = currentRole() === "trainer" ? [{ column: "organization_id", value: currentOrgId() }] : [{ column: "client_user_id", value: state.user.id }];
+              const threads = await restSelect("v_message_threads_overview", { select: "*", filters: threadFilters, order: { column: "updated_at", ascending: false }, limit: 50 });
+              if (!state.ui.selectedThreadId && threads[0]?.id) state.ui.selectedThreadId = threads[0].id;
+              const messages = state.ui.selectedThreadId ? await restSelect("messages", { select: "*", filters: [{ column: "thread_id", value: state.ui.selectedThreadId }], order: { column: "sent_at", ascending: true }, limit: 150 }) : [];
+              const clients = currentRole() === "trainer" ? await restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }) : [];
+              data = { threads, messages, clients };
+            } else if (route === "/app/trainer/calendar" || route === "/app/client/calendar") {
+              const filters = currentRole() === "trainer" ? [{ column: "organization_id", value: currentOrgId() }] : [{ column: "client_user_id", value: state.user.id }];
+              const [sessions, clients] = await Promise.all([
+                restSelect("v_calendar_agenda", { select: "*", filters, order: { column: "scheduled_for", ascending: true, nulls: "nullslast" }, limit: 60 }),
+                currentRole() === "trainer" ? restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }) : Promise.resolve([]),
+              ]);
+              data = { sessions, clients };
+            } else if (route === "/app/trainer/files") {
+              data = { profile: state.profile, organization: state.organization };
+            } else if (route === "/app/trainer/analytics") {
+              data = { metrics: await restSelect("v_growth_metrics", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "day", ascending: false }, limit: 21 }) };
+            } else if (route === "/app/trainer/billing") {
+              data = { requests: await safeSelect("workspace_access_requests", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "created_at", ascending: false }, limit: 25 }, []) };
+            } else if (route === "/app/trainer/settings") {
+              data = { organization: state.organization, preferences: state.notificationPreferences };
+            } else if (route === "/app/client/home") {
+              const [today, notices] = await Promise.all([
+                restSelect("v_client_today", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], single: true }),
+                safeSelect("notifications", { select: "*", filters: [{ column: "recipient_user_id", value: state.user.id }], order: { column: "created_at", ascending: false }, limit: 5 }, []),
+              ]);
+              data = { today, notices };
+            } else if (route === "/app/client/plan") {
+              data = { plan: await restSelect("v_client_plan", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], order: { column: "week_number", ascending: true }, limit: 120 }) };
+            } else if (route === "/app/client/checkins") {
+              data = { checkins: await restSelect("checkins", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], order: { column: "created_at", ascending: false }, limit: 30 }) };
+            } else if (route === "/app/client/progress") {
+              data = { progress: await safeSelect("progress_entries", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], order: { column: "recorded_at", ascending: false }, limit: 50 }, []) };
+            } else if (route === "/app/client/files") {
+              data = { profile: state.profile, organization: state.organization };
+            } else if (route === "/app/client/account") {
+              data = { profile: state.profile, clientProfile: state.clientProfile, preferences: state.notificationPreferences };
+            } else if (route === "/app/admin/overview") {
+              const [accessRows, requests] = await Promise.all([
+                safeSelect("workspace_access", { select: "*", order: { column: "updated_at", ascending: false }, limit: 20 }, []),
+                safeSelect("activation_requests", { select: "*", order: { column: "created_at", ascending: false }, limit: 20 }, []),
+              ]);
+              data = { accessRows, requests };
+            } else if (route === "/app/admin/access") {
+              const [accessRows, requests] = await Promise.all([
+                safeSelect("workspace_access", { select: "*", order: { column: "updated_at", ascending: false }, limit: 60 }, []),
+                safeSelect("workspace_access_requests", { select: "*", order: { column: "created_at", ascending: false }, limit: 60 }, []),
+              ]);
+              data = { accessRows, requests };
+            } else if (route === "/app/admin/access/request") {
+              const requestId = state.route.query.get("request");
+              const request = requestId ? await safeSelect("workspace_access_requests", { select: "*", filters: [{ column: "id", value: requestId }], single: true }, null) : null;
+              const access = request?.organization_id ? await safeSelect("workspace_access", { select: "*", filters: [{ column: "organization_id", value: request.organization_id }], single: true }, null) : null;
+              data = { request, access };
+            } else if (route === "/app/admin/users") {
+              const [memberships, admins] = await Promise.all([
+                safeSelect("organization_memberships", { select: "*", order: { column: "updated_at", ascending: false }, limit: 80 }, []),
+                safeSelect("platform_admin_memberships", { select: "*", order: { column: "updated_at", ascending: false }, limit: 40 }, []),
+              ]);
+              data = { memberships, admins };
+            } else if (route === "/app/admin/support") {
+              data = { queue: await safeSelect("v_admin_support_queue", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
+            } else if (route === "/app/admin/support/detail") {
+              const queueId = state.route.query.get("queue");
+              data = {
+                item: queueId ? await safeSelect("v_admin_support_queue", { select: "*", filters: [{ column: "id", value: queueId }], single: true }, null) : null,
+              };
             } else if (route === "/app/admin/audit") {
               data = { audit: await safeSelect("audit_log", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
             } else if (route === "/app/admin/settings") {
@@ -1168,7 +1739,7 @@
               expires_in: Number(params.get("expires_in") || 3600),
               token_type: params.get("token_type") || "bearer",
             });
-            const inviteToken = readString(STORAGE_KEYS.invite, "");
+            const inviteToken = currentInviteToken();
             window.history.replaceState({}, "", `${window.location.pathname}#${inviteToken ? `/invite?token=${encodeURIComponent(inviteToken)}` : "/verify"}`);
           }
         }
@@ -1189,32 +1760,13 @@
 
         async function syncRoute() {
           state.route = parseRoute(window.location.hash);
+          updateDocumentMeta();
           render();
-          if (state.route.path === "/signup") {
-            const passwordInput = document.querySelector('#signup-form input[name="password"]');
-            const passwordField = passwordInput?.closest(".field");
-            if (passwordInput) {
-              passwordInput.required = false;
-              passwordInput.disabled = true;
-              passwordInput.value = "";
-            }
-            if (passwordField) passwordField.style.display = "none";
-          }
           if (!pageGuard()) return;
           await loadPublicPackages();
           if (state.session) await loadUserContext();
           await loadRouteData();
           render();
-          if (state.route.path === "/signup") {
-            const passwordInput = document.querySelector('#signup-form input[name="password"]');
-            const passwordField = passwordInput?.closest(".field");
-            if (passwordInput) {
-              passwordInput.required = false;
-              passwordInput.disabled = true;
-              passwordInput.value = "";
-            }
-            if (passwordField) passwordField.style.display = "none";
-          }
         }
 
         function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim()); }
@@ -1241,7 +1793,7 @@
         }
 
         function currentPackageCards(featuredCode = "pro_coach") {
-          const packages = state.packages.length ? state.packages : FALLBACK_PACKAGES;
+          const packages = state.packages.length ? state.packages : PUBLIC_FALLBACK_PACKAGES;
           return packages.map((pkg) => {
             const featured = pkg.code === featuredCode;
             return `
@@ -1256,10 +1808,10 @@
                 <p class="body-copy">${escapeHtml(packageDescription(pkg))}</p>
                 <div class="price"><strong>${escapeHtml(formatMoney(pkg.amount_cents, pkg.currency_code))}</strong><span class="muted">/ ${escapeHtml(tr("month", "شهر"))}</span></div>
                 <div class="tag-row">
-                  <span class="mini-badge">${escapeHtml(tr("Manual activation", "تفعيل يدوي"))}</span>
+                  <span class="mini-badge">${escapeHtml(tr("Launch package", "باقة إطلاق"))}</span>
                   <span class="mini-badge">${escapeHtml(tr(`${pkg.trial_days || 0}-day trial`, `${pkg.trial_days || 0} أيام تجربة`))}</span>
                 </div>
-                <a class="btn btn-secondary" href="${pathToHash("/signup")}">${escapeHtml(tr("Start with this package", "ابدأ بهذه الباقة"))}</a>
+                <a class="btn btn-secondary" href="${pathToHash("/contact", new URLSearchParams({ packageCode: pkg.code }))}">${escapeHtml(tr("Request this package", "اطلب هذه الباقة"))}</a>
               </article>
             `;
           }).join("");
@@ -1417,7 +1969,7 @@
           `;
         }
 
-        function renderPublicRoute() {
+        function legacyRenderPublicRoute() {
           const path = state.route.path;
           if (path === "/home") return renderPublicHome();
           if (path === "/trainers") return renderSimplePage(tr("For trainers", "للمدربين"), tr("Run a premium coaching workspace", "أدر مساحة تدريب احترافية"), tr("GrindCTRL helps coaches move from scattered messaging and manual follow-up into a cleaner system for programs, check-ins, clients, reminders, and access control.", "يساعد GrindCTRL المدربين على الانتقال من الرسائل المتفرقة والمتابعة اليدوية إلى نظام أوضح للبرامج والتقييمات والعملاء والتذكيرات والتحكم في الوصول."));
@@ -1444,6 +1996,8 @@
             "/app/trainer/clients": tr("Clients", "العملاء"),
             "/app/trainer/programs": tr("Programs", "البرامج"),
             "/app/trainer/checkins": tr("Check-ins", "التقييمات"),
+            "/app/trainer/client": tr("Client Detail", "تفاصيل العميل"),
+            "/app/trainer/program": tr("Program Detail", "تفاصيل البرنامج"),
             "/app/trainer/messages": tr("Messages", "الرسائل"),
             "/app/trainer/calendar": tr("Calendar", "الجدول"),
             "/app/trainer/files": tr("Files", "الملفات"),
@@ -1460,8 +2014,10 @@
             "/app/client/account": tr("Account", "الحساب"),
             "/app/admin/overview": tr("Admin Overview", "نظرة المشرف"),
             "/app/admin/access": tr("Access Control", "إدارة الوصول"),
+            "/app/admin/access/request": tr("Access Request Detail", "تفاصيل طلب الوصول"),
             "/app/admin/users": tr("Users", "المستخدمون"),
             "/app/admin/support": tr("Support", "الدعم"),
+            "/app/admin/support/detail": tr("Support Detail", "تفاصيل الدعم"),
             "/app/admin/audit": tr("Audit", "السجل"),
             "/app/admin/settings": tr("Settings", "الإعدادات"),
           };
@@ -1559,12 +2115,510 @@
           );
         }
 
+        function routeMeta(path = state.route.path) {
+          const registry = {
+            "/home": {
+              title: tr("GrindCTRL AI Trainer | Grow your coaching business", "GrindCTRL AI Trainer | نمِّ عملك التدريبي"),
+              description: tr("A premium Arabic-English coaching platform for trainers, gyms, and clients across plans, check-ins, progress, accountability, communication, and access.", "منصة تدريب متميزة بالعربية والإنجليزية للمدربين والنوادي والعملاء عبر الخطط والمتابعات والتقدم والانضباط والتواصل والوصول."),
+            },
+            "/trainers": {
+              title: tr("For Trainers | GrindCTRL AI Trainer", "للمدربين | GrindCTRL AI Trainer"),
+              description: tr("Run a premium coaching workspace with clearer client follow-up, plans, check-ins, communication, and launch package clarity.", "أدِر مساحة تدريب احترافية بمتابعة أوضح للعملاء والخطط والمتابعات والتواصل ووضوح أكبر في باقات الإطلاق."),
+            },
+            "/clients": {
+              title: tr("For Clients | GrindCTRL AI Trainer", "للعملاء | GrindCTRL AI Trainer"),
+              description: tr("Give clients a clearer next step, structured follow-up, progress visibility, and a smoother trainer-linked or standalone journey.", "امنح العملاء خطوة تالية أوضح ومتابعة منظمة ووضوحًا في التقدم ورحلة أسهل سواء مع مدرب أو بشكل مستقل."),
+            },
+            "/packages": {
+              title: tr("Packages | GrindCTRL AI Trainer", "الباقات | GrindCTRL AI Trainer"),
+              description: tr("Compare the live launch packages for GrindCTRL AI Trainer and request the package that matches your coaching model.", "قارن باقات الإطلاق الحية في GrindCTRL AI Trainer واطلب الباقة التي تناسب نموذجك التدريبي."),
+            },
+            "/faq": {
+              title: tr("FAQ | GrindCTRL AI Trainer", "الأسئلة الشائعة | GrindCTRL AI Trainer"),
+              description: tr("Read the key answers about launch, activation, client onboarding, bilingual support, and access behavior.", "اقرأ الإجابات الأساسية حول الإطلاق والتفعيل وتهيئة العملاء والدعم ثنائي اللغة وسلوك الوصول."),
+            },
+            "/contact": {
+              title: tr("Contact | GrindCTRL AI Trainer", "تواصل | GrindCTRL AI Trainer"),
+              description: tr("Request a launch review, package recommendation, or product walkthrough for your coaching business.", "اطلب مراجعة إطلاق أو ترشيح باقة أو جولة تعريفية لعملك التدريبي."),
+            },
+            "/privacy": {
+              title: tr("Privacy Policy | GrindCTRL AI Trainer", "سياسة الخصوصية | GrindCTRL AI Trainer"),
+              description: tr("Learn how GrindCTRL stores core product records and uses operational tooling to support the product experience.", "تعرّف على كيفية تخزين GrindCTRL لسجلات المنتج الأساسية واستخدامه أدوات التشغيل لدعم التجربة."),
+            },
+            "/terms": {
+              title: tr("Terms | GrindCTRL AI Trainer", "الشروط | GrindCTRL AI Trainer"),
+              description: tr("Review the current launch terms, activation model, and access behavior for GrindCTRL AI Trainer.", "راجع شروط الإطلاق الحالية ونموذج التفعيل وسلوك الوصول في GrindCTRL AI Trainer."),
+            },
+            "/cookies": {
+              title: tr("Cookie Policy | GrindCTRL AI Trainer", "سياسة الكوكيز | GrindCTRL AI Trainer"),
+              description: tr("See how the app uses browser storage for language, theme, session continuity, and product experience settings.", "اطلع على كيفية استخدام التطبيق لتخزين المتصفح من أجل اللغة والمظهر واستمرارية الجلسة وإعدادات التجربة."),
+            },
+          };
+          return registry[path] || {
+            title: tr("GrindCTRL AI Trainer", "GrindCTRL AI Trainer"),
+            description: tr("Bilingual coaching SaaS for trainers, gyms, and clients.", "منصة تدريب ثنائية اللغة للمدربين والأندية والعملاء."),
+          };
+        }
+
+        function renderPublicChecklist(items) {
+          return `
+            <ul class="clean-list">
+              ${items.map((item) => `<li class="list-item"><span class="dot"></span><div>${escapeHtml(item)}</div></li>`).join("")}
+            </ul>
+          `;
+        }
+
+        function renderPublicLegalPage(title, copy, details) {
+          return renderSimplePage(
+            tr("Legal", "قانوني"),
+            title,
+            copy,
+            `
+              <section class="split-grid">
+                ${details.map((item) => `
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(item.kicker)}</p>
+                    <h3 class="card-title">${escapeHtml(item.title)}</h3>
+                    <p class="body-copy">${escapeHtml(item.body)}</p>
+                  </article>
+                `).join("")}
+              </section>
+            `,
+          );
+        }
+
+        function renderPublicTrainerPage() {
+          return renderSimplePage(
+            tr("For trainers", "للمدربين"),
+            tr("Run your coaching business with more clarity and less admin drag", "أدِر عملك التدريبي بوضوح أكبر وضغط إداري أقل"),
+            tr("GrindCTRL gives coaches and gyms one bilingual, mobile-ready place to organize clients, plans, check-ins, communication, files, and access.", "يمنح GrindCTRL المدربين والنوادي مكانًا واحدًا ثنائي اللغة وجاهزًا للجوال لتنظيم العملاء والخطط والمتابعات والتواصل والملفات والوصول."),
+            `
+              <section class="split-grid">
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Why trainers buy", "لماذا يشتريه المدربون"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("The platform is built around delivery, not just records", "المنصة مبنية حول تقديم الخدمة لا مجرد حفظ السجلات"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("See clients, plans, check-ins, and communication in one workflow instead of across scattered tools.", "شاهد العملاء والخطط والمتابعات والتواصل في مسار واحد بدلًا من أدوات متفرقة."),
+                    tr("Keep onboarding, package state, and access changes visible without explaining your system manually every time.", "اجعل التهيئة وحالة الباقة وتغييرات الوصول واضحة بدون شرح يدوي متكرر."),
+                    tr("Operate in Arabic or English with a consistent mobile experience for coaches, staff, and clients.", "اعمل بالعربية أو الإنجليزية مع تجربة متسقة على الجوال للمدربين والفريق والعملاء."),
+                  ])}
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("First-week wins", "مكاسب الأسبوع الأول"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("What the launch path looks like", "كيف يبدو مسار الانطلاق"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("Create your workspace and define the coaching model you want to run.", "أنشئ مساحة العمل وحدد نموذج التدريب الذي تريد تشغيله."),
+                    tr("Add the first client, assign the first program, and request the right launch package.", "أضف أول عميل وعيّن أول برنامج واطلب باقة الإطلاق المناسبة."),
+                    tr("Bring check-ins, reminders, and client follow-up into one system your team can actually use daily.", "اجمع المتابعات والتذكيرات وتواصل العميل في نظام واحد يمكن لفريقك استخدامه يوميًا."),
+                  ])}
+                </article>
+              </section>
+              <section class="section">
+                <div class="container two-up">
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Operational value", "القيمة التشغيلية"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Cleaner delivery for every coach and workspace", "تقديم أنظف لكل مدرب ومساحة عمل"))}</h3>
+                    <p class="body-copy">${escapeHtml(tr("Use GrindCTRL when you want one coaching system for programs, client follow-up, files, calendar touchpoints, and access control without hiding core truth in the frontend.", "استخدم GrindCTRL عندما تريد نظامًا واحدًا للبرامج ومتابعة العملاء والملفات ونقاط التقويم والتحكم في الوصول بدون إخفاء الحقيقة الأساسية داخل الواجهة."))}</p>
+                  </article>
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Best fit", "الأنسب له"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Solo coaches, studios, and growing gym teams", "المدربون المستقلون والاستوديوهات وفرق النوادي المتنامية"))}</h3>
+                    <p class="body-copy">${escapeHtml(tr("The launch packages are strongest for coaches who want a premium client journey now, while keeping billing, activation, and internal operations controlled during rollout.", "باقات الإطلاق مناسبة أكثر للمدربين الذين يريدون رحلة عميل احترافية الآن مع إبقاء الفوترة والتفعيل والتشغيل الداخلي تحت السيطرة أثناء الإطلاق."))}</p>
+                    <div class="hero-cta" style="margin-top:18px;">
+                      <a class="btn btn-primary" href="${pathToHash("/signup")}">${escapeHtml(tr("Start as a Trainer", "ابدأ كمدرب"))}</a>
+                      <a class="btn btn-secondary" href="${pathToHash("/packages")}">${escapeHtml(tr("Compare launch packages", "قارن باقات الإطلاق"))}</a>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            `,
+          );
+        }
+
+        function renderPublicClientsPage() {
+          return renderSimplePage(
+            tr("For clients", "للعملاء"),
+            tr("Give every client a clearer next step and a more motivating journey", "امنح كل عميل خطوة تالية أوضح ورحلة أكثر تحفيزًا"),
+            tr("Clients should know what to do today, what to report this week, and how their progress is changing without digging through messages.", "يجب أن يعرف العميل ماذا يفعل اليوم وماذا يرسل هذا الأسبوع وكيف يتغير تقدمه بدون البحث في الرسائل."),
+            `
+              <section class="split-grid">
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Client experience", "تجربة العميل"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Simple enough to follow, structured enough to improve", "بسيطة بما يكفي للالتزام ومنظمة بما يكفي للتحسن"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("One clear home surface for the next workout, the next check-in, reminders, and coaching context.", "واجهة رئيسية واحدة واضحة للتمرين القادم والمتابعة القادمة والتنبيهات وسياق التدريب."),
+                    tr("Structured check-ins and progress tracking that help clients describe what is working and what is blocking them.", "متابعات منظمة وتتبع للتقدم يساعدان العميل على وصف ما ينجح وما الذي يعطله."),
+                    tr("A bilingual, mobile-first experience that still feels personal whether the client is linked to a trainer or starting solo.", "تجربة ثنائية اللغة ومصممة للجوال وتظل شخصية سواء كان العميل مرتبطًا بمدرب أو يبدأ بشكل مستقل."),
+                  ])}
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Two ways to start", "طريقتان للبداية"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Join a trainer or begin your own path", "انضم إلى مدرب أو ابدأ مسارك الخاص"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("Trainer-linked clients keep their coaching relationship, check-ins, and communication organized in one place.", "العملاء المرتبطون بمدرب يحافظون على علاقة التدريب والمتابعات والتواصل في مكان واحد."),
+                    tr("Standalone clients can begin with a personal workspace, then connect to a trainer later through an invite.", "يمكن للعملاء المستقلين البدء بمساحة شخصية ثم الارتباط بمدرب لاحقًا عبر دعوة."),
+                    tr("The product stays focused on the next action so progress feels practical, not overwhelming.", "يبقى المنتج مركزًا على الخطوة التالية حتى يبدو التقدم عمليًا لا مرهقًا."),
+                  ])}
+                </article>
+              </section>
+              <section class="section">
+                <div class="container two-up">
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("What improves", "ما الذي يتحسن"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Less confusion, more consistency", "حيرة أقل واتساق أكثر"))}</h3>
+                    <p class="body-copy">${escapeHtml(tr("The client experience is strongest when the coach uses GrindCTRL as the main place for plans, progress, and accountability instead of relying on scattered reminders and message threads.", "تجربة العميل تكون أقوى عندما يستخدم المدرب GrindCTRL كمكان رئيسي للخطة والتقدم والانضباط بدل الاعتماد على تذكيرات ورسائل متفرقة."))}</p>
+                  </article>
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Next step", "الخطوة التالية"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("See how the platform fits your journey", "اكتشف كيف تناسبك المنصة"))}</h3>
+                    <div class="hero-cta" style="margin-top:18px;">
+                      <a class="btn btn-primary" href="${pathToHash("/signup")}">${escapeHtml(tr("Start My Fitness Journey", "ابدأ رحلتي الرياضية"))}</a>
+                      <a class="btn btn-secondary" href="${pathToHash("/contact")}">${escapeHtml(tr("Ask about trainer-linked onboarding", "اسأل عن التهيئة المرتبطة بالمدرب"))}</a>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            `,
+          );
+        }
+
+        function renderPublicPackagesPage() {
+          return renderSimplePage(
+            tr("Packages", "الباقات"),
+            tr("Choose the launch package that matches your coaching model", "اختر باقة الإطلاق التي تناسب نموذجك التدريبي"),
+            tr("Public pricing follows the live package catalog. Activation is currently handled with human review so access stays aligned with the right workspace and package state.", "التسعير العام يتبع كتالوج الباقات الحي. ويجري التفعيل حاليًا بمراجعة بشرية حتى يبقى الوصول متوافقًا مع مساحة العمل وحالة الباقة الصحيحة."),
+            `
+              <section class="split-grid">
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("How launch works", "كيف يعمل الإطلاق"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Visible packages, controlled activation", "باقات واضحة وتفعيل مضبوط"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("Choose the package that matches your size, then send a launch request.", "اختر الباقة المناسبة لحجمك ثم أرسل طلب الإطلاق."),
+                    tr("Activation and package state are reviewed from the backend so workspace access stays consistent.", "تتم مراجعة التفعيل وحالة الباقة من الخلفية حتى يبقى وصول مساحة العمل متسقًا."),
+                    tr("The catalog stays public while actual access remains enforced after approval.", "يبقى الكتالوج عامًا بينما يظل الوصول الفعلي مفروضًا بعد الموافقة."),
+                  ])}
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("What to compare", "ما الذي تقارنه"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Pick by operating shape, not just price", "اختر حسب شكل التشغيل لا السعر فقط"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("Solo Coach fits lean coaching operations with one premium workspace.", "سولو كوتش يناسب التشغيل الخفيف مع مساحة عمل احترافية واحدة."),
+                    tr("Pro Coach fits coaches handling more active clients and a richer operating rhythm.", "برو كوتش يناسب المدربين الذين يديرون عددًا أكبر من العملاء مع إيقاع تشغيلي أعمق."),
+                    tr("Gym / Studio fits multi-coach environments where access control matters more.", "نادي / ستوديو يناسب البيئات متعددة المدربين حيث يصبح التحكم في الوصول أكثر أهمية."),
+                  ])}
+                </article>
+              </section>
+              <div class="package-grid" style="margin-top:18px;">${currentPackageCards()}</div>
+              <section class="section">
+                <div class="container two-up">
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Need help choosing?", "هل تحتاج مساعدة في الاختيار؟"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("We can map the package to your rollout", "يمكننا ربط الباقة بخطة إطلاقك"))}</h3>
+                    <p class="body-copy">${escapeHtml(tr("Use the contact form if you want a recommendation based on your current client load, coaching format, or team size.", "استخدم نموذج التواصل إذا كنت تريد ترشيحًا بناءً على عدد عملائك الحالي أو أسلوب التدريب أو حجم الفريق."))}</p>
+                  </article>
+                  <article class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Next step", "الخطوة التالية"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Start the launch conversation", "ابدأ محادثة الإطلاق"))}</h3>
+                    <div class="hero-cta" style="margin-top:18px;">
+                      <a class="btn btn-primary" href="${pathToHash("/contact")}">${escapeHtml(tr("Request a launch review", "اطلب مراجعة إطلاق"))}</a>
+                      <a class="btn btn-secondary" href="${pathToHash("/signup")}">${escapeHtml(tr("Open a workspace account", "افتح حساب مساحة عمل"))}</a>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            `,
+          );
+        }
+
+        function renderPublicFaqPage() {
+          return renderSimplePage(
+            tr("FAQ", "الأسئلة"),
+            tr("Answer the key questions before you launch or join", "أجب عن الأسئلة الأساسية قبل أن تطلق أو تنضم"),
+            tr("These are the points that usually matter before a trainer rollout, a client signup, or a package request.", "هذه هي النقاط التي تهم عادة قبل إطلاق المدرب أو تسجيل العميل أو طلب الباقة."),
+            `
+              <section class="split-grid">
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("For trainers", "للمدربين"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Launch, pricing, and access clarity", "وضوح الإطلاق والتسعير والوصول"))}</h3>
+                  <p class="body-copy">${escapeHtml(tr("Use these answers when you want to understand package handling, activation, and how the platform fits a premium coaching operation.", "استخدم هذه الإجابات عندما تريد فهم طريقة الباقات والتفعيل وكيف تناسب المنصة تشغيلًا تدريبيًا احترافيًا."))}</p>
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("For clients", "للعملاء"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Getting started and staying guided", "البداية والبقاء على مسار واضح"))}</h3>
+                  <p class="body-copy">${escapeHtml(tr("The client journey is designed to reduce confusion, keep the next action visible, and support both standalone and trainer-linked paths.", "صُممت رحلة العميل لتقليل الحيرة وإبقاء الخطوة التالية مرئية ودعم المسار المستقل والمسار المرتبط بالمدرب."))}</p>
+                </article>
+              </section>
+              <div class="stack" style="margin-top:18px;">${PUBLIC_FAQS.map((item) => `<article class="card"><h4 style="margin:0 0 10px">${escapeHtml(isArabic() ? item.ar_q : item.en_q)}</h4><p class="body-copy">${escapeHtml(isArabic() ? item.ar_a : item.en_a)}</p></article>`).join("")}</div>
+              <article class="card" style="margin-top:18px;">
+                <p class="card-kicker">${escapeHtml(tr("Still deciding?", "ما زلت تقرر؟"))}</p>
+                <h3 class="card-title">${escapeHtml(tr("Ask us about your exact use case", "اسألنا عن حالتك بالتحديد"))}</h3>
+                <div class="hero-cta" style="margin-top:18px;">
+                  <a class="btn btn-primary" href="${pathToHash("/contact")}">${escapeHtml(tr("Contact the launch team", "تواصل مع فريق الإطلاق"))}</a>
+                </div>
+              </article>
+            `,
+          );
+        }
+
+        function renderPublicHome() {
+          return `
+            <section class="hero">
+              <div class="container hero-grid">
+                <article class="hero-card">
+                  <p class="eyebrow">${escapeHtml(tr("Premium Arabic-English coaching platform", "منصة تدريب متميزة بالعربية والإنجليزية"))}</p>
+                  <h2 class="headline">${escapeHtml(tr("Grow your coaching business - and guide every client to real progress.", "نمِّ عملك التدريبي، ووجّه كل عميل إلى تقدّم حقيقي."))}</h2>
+                  <p class="lead">${escapeHtml(tr("GrindCTRL brings plans, check-ins, progress, accountability, and communication into one premium Arabic-English platform for trainers, gyms, and clients.", "يجمع GrindCTRL الخطط، والمتابعات، والتقدّم، والانضباط، والتواصل في منصة واحدة متميزة بالعربية والإنجليزية للمدربين، والنوادي، والعملاء."))}</p>
+                  <div class="hero-cta">
+                    <a class="btn btn-primary" href="${pathToHash("/signup")}">${escapeHtml(tr("Start as a Trainer", "ابدأ كمدرب"))}</a>
+                    <a class="btn btn-secondary" href="${pathToHash("/clients")}">${escapeHtml(tr("Start My Fitness Journey", "ابدأ رحلتي الرياضية"))}</a>
+                  </div>
+                  <div class="hero-strip">
+                    <div class="hero-stat"><strong>2</strong><span>${escapeHtml(tr("Trainer and client journeys in one product", "رحلتا المدرب والعميل في منتج واحد"))}</span></div>
+                    <div class="hero-stat"><strong>AR/EN</strong><span>${escapeHtml(tr("Arabic and English are first-class", "العربية والإنجليزية من الأساس"))}</span></div>
+                    <div class="hero-stat"><strong>7d</strong><span>${escapeHtml(tr("Live launch trial from the current package catalog", "تجربة إطلاق من الكتالوج الحي الحالي"))}</span></div>
+                  </div>
+                </article>
+                <aside class="hero-panel stack">
+                  <div class="notice-strip">${icon("shield")}<div><strong>${escapeHtml(tr("Built for premium launch quality", "مبني لإطلاق احترافي"))}</strong><p class="body-copy">${escapeHtml(tr("The public journey stays clear, bilingual, and mobile-ready while access, package state, and workspace boundaries remain controlled behind the scenes.", "تبقى الرحلة العامة واضحة وثنائية اللغة وجاهزة للجوال بينما تظل حالة الباقة والوصول وحدود مساحة العمل مضبوطة خلف الكواليس."))}</p></div></div>
+                  <div class="card">
+                    <p class="card-kicker">${escapeHtml(tr("For trainers", "للمدربين"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Turn coaching delivery into a real operating system", "حوّل تقديم التدريب إلى نظام تشغيل حقيقي"))}</h3>
+                    ${renderPublicChecklist([
+                      tr("Organize clients, plans, check-ins, and communication from one workspace instead of across scattered chats and notes.", "نظّم العملاء والخطط والمتابعات والتواصل من مساحة واحدة بدل الدردشات والملاحظات المتفرقة."),
+                      tr("Bring onboarding, accountability, and follow-up into a flow your team can repeat with confidence.", "اجمع التهيئة والانضباط والمتابعة في مسار يستطيع فريقك تكراره بثقة."),
+                      tr("Scale from solo coaching to a studio setup without changing the product story for your clients.", "انتقل من التدريب الفردي إلى إعداد الاستوديو بدون تغيير قصة المنتج أمام عملائك."),
+                    ])}
+                  </div>
+                  <div class="card">
+                    <p class="card-kicker">${escapeHtml(tr("For clients", "للعملاء"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Make the next step obvious every day", "اجعل الخطوة التالية واضحة كل يوم"))}</h3>
+                    ${renderPublicChecklist([
+                      tr("See today's workout, the next check-in, reminders, and progress in one clear mobile-ready place.", "شاهد تمرين اليوم والمتابعة القادمة والتنبيهات والتقدم في مكان واحد واضح وجاهز للجوال."),
+                      tr("Respond to structured coaching prompts instead of trying to remember everything in chat.", "استجب لأسئلة تدريبية منظمة بدل محاولة تذكر كل شيء داخل المحادثة."),
+                      tr("Start independently now, then join a trainer later without losing your momentum.", "ابدأ بشكل مستقل الآن ثم انضم إلى مدرب لاحقًا بدون أن تخسر زخمك."),
+                    ])}
+                  </div>
+                </aside>
+              </div>
+            </section>
+
+            <section class="section"><div class="container stats-grid">
+              <div class="card"><p class="card-kicker">${escapeHtml(tr("Built for both sides", "مبني للطرفين"))}</p><h3 class="card-title">${escapeHtml(tr("One platform for delivery and transformation", "منصة واحدة للتشغيل والتحول"))}</h3><p class="body-copy">${escapeHtml(tr("Trainers get operational control, and clients get a clearer journey they can actually follow every week.", "يحصل المدرب على تحكم تشغيلي، ويحصل العميل على رحلة أوضح يمكنه الالتزام بها أسبوعًا بعد أسبوع."))}</p></div>
+              <div class="card"><p class="card-kicker">${escapeHtml(tr("End-to-end coaching flow", "رحلة تدريب كاملة"))}</p><h3 class="card-title">${escapeHtml(tr("Onboarding -> plan -> check-in -> progress -> follow-up", "تهيئة -> خطة -> متابعة -> تقدم -> متابعة تدريبية"))}</h3><p class="body-copy">${escapeHtml(tr("The product is strongest when the full coaching loop lives in one place instead of hopping between chats, notes, and spreadsheets.", "تكون المنصة أقوى عندما تعيش حلقة التدريب كاملة في مكان واحد بدل التنقل بين الدردشات والملاحظات والجداول."))}</p></div>
+              <div class="card"><p class="card-kicker">${escapeHtml(tr("Launch support", "دعم الإطلاق"))}</p><h3 class="card-title">${escapeHtml(tr("Human activation with clear next steps", "تفعيل بشري مع خطوات تالية واضحة"))}</h3><p class="body-copy">${escapeHtml(tr("Launch packages stay visible, and the activation path stays understandable for trainers, teams, and clients.", "تبقى باقات الإطلاق مرئية، ويبقى مسار التفعيل مفهومًا للمدربين والفرق والعملاء."))}</p></div>
+            </div></section>
+
+            <section class="section"><div class="container split-grid">
+              <article class="card">
+                <p class="card-kicker">${escapeHtml(tr("Trainer value", "قيمة المدرب"))}</p>
+                <h3 class="section-title">${escapeHtml(tr("Operate with more clarity, confidence, and follow-through", "اعمل بوضوح وثقة ومتابعة أفضل"))}</h3>
+                <div class="feature-grid">
+                  ${[
+                    [tr("Onboarding", "التهيئة"), tr("Guide trainers and clients into the right path instead of dumping them into a generic shell.", "وجّه المدربين والعملاء إلى المسار الصحيح بدل رميهم داخل قالب عام.")],
+                    [tr("Programs", "البرامج"), tr("Keep plans, workouts, and coaching notes tied to the real client journey.", "أبقِ الخطط والتمارين وملاحظات التدريب مرتبطة برحلة العميل الحقيقية.")],
+                    [tr("Check-ins", "المتابعات"), tr("Use structured follow-up to spot adherence issues and progress risks sooner.", "استخدم متابعة منظمة لاكتشاف مشكلات الالتزام ومخاطر التقدم أسرع.")],
+                    [tr("Progress", "التقدم"), tr("Make body, habit, and milestone changes easier to review over time.", "اجعل تغيّرات القياسات والعادات والمحطات أوضح في المراجعة مع الوقت.")],
+                    [tr("Communication", "التواصل"), tr("Keep messages closer to the coaching workflow instead of buried in external chats.", "أبقِ الرسائل أقرب إلى مسار التدريب بدل دفنها في محادثات خارجية.")],
+                    [tr("Access clarity", "وضوح الوصول"), tr("Show package context publicly while keeping real access authority in the product backend.", "اعرض سياق الباقة علنًا مع إبقاء مرجعية الوصول الحقيقية في الخلفية.")],
+                  ].map(([title, body]) => `<div class="card"><h4 style="margin:0 0 8px">${escapeHtml(title)}</h4><p class="body-copy">${escapeHtml(body)}</p></div>`).join("")}
+                </div>
+              </article>
+              <aside class="card">
+                <p class="card-kicker">${escapeHtml(tr("Client value", "قيمة العميل"))}</p>
+                <h3 class="card-title">${escapeHtml(tr("A clearer path to consistency and progress", "مسار أوضح للالتزام والتقدم"))}</h3>
+                <p class="body-copy">${escapeHtml(tr("The client side should feel simple, encouraging, and easy to follow on a phone. GrindCTRL keeps the next action visible while preserving the trainer relationship behind it.", "يجب أن يشعر جانب العميل بالبساطة والدعم وسهولة المتابعة على الهاتف. يحافظ GrindCTRL على وضوح الخطوة التالية مع الحفاظ على علاقة المدرب خلفها."))}</p>
+                <div class="feature-grid" style="grid-template-columns:1fr; margin-top:16px;">
+                  ${[
+                    [tr("Know what to do today", "اعرف ماذا تفعل اليوم"), tr("The client home is centered on the next action, not on menu noise.", "واجهة العميل تتمحور حول الخطوة التالية لا حول ضجيج القوائم.")],
+                    [tr("Check in with context", "أرسل المتابعة بسياق"), tr("Weekly feedback should feel guided, not like writing into a blank box.", "يجب أن تبدو المتابعة الأسبوعية موجهة لا كأنك تكتب داخل مربع فارغ.")],
+                    [tr("Stay connected", "ابقَ متصلًا"), tr("Progress, reminders, and trainer communication stay close together so the journey feels active.", "يبقى التقدم والتنبيهات وتواصل المدرب قريبين من بعضهم حتى تبدو الرحلة حية.")],
+                  ].map(([title, body]) => `<div class="card"><h4 style="margin:0 0 8px">${escapeHtml(title)}</h4><p class="body-copy">${escapeHtml(body)}</p></div>`).join("")}
+                </div>
+              </aside>
+            </div></section>
+          `;
+        }
+
+        function renderPublicHome() {
+          return `
+            <section class="hero">
+              <div class="container hero-grid">
+                <article class="hero-card">
+                  <p class="eyebrow">${escapeHtml(tr("Premium Arabic-English coaching platform", "منصة تدريب متميزة بالعربية والإنجليزية"))}</p>
+                  <h2 class="headline">${escapeHtml(tr("Grow your coaching business - and guide every client to real progress.", "نمِّ عملك التدريبي، ووجّه كل عميل إلى تقدّم حقيقي."))}</h2>
+                  <p class="lead">${escapeHtml(tr("GrindCTRL brings plans, check-ins, progress, accountability, and communication into one premium Arabic-English platform for trainers, gyms, and clients.", "يجمع GrindCTRL الخطط، والمتابعات، والتقدّم، والانضباط، والتواصل في منصة واحدة متميزة بالعربية والإنجليزية للمدربين، والنوادي، والعملاء."))}</p>
+                  <div class="hero-cta">
+                    <a class="btn btn-primary" href="${pathToHash("/signup")}">${escapeHtml(tr("Start as a Trainer", "ابدأ كمدرب"))}</a>
+                    <a class="btn btn-secondary" href="${pathToHash("/clients")}">${escapeHtml(tr("Start My Fitness Journey", "ابدأ رحلتي الرياضية"))}</a>
+                  </div>
+                  <div class="hero-strip">
+                    <div class="hero-stat"><strong>2</strong><span>${escapeHtml(tr("Trainer and client journeys in one product", "رحلتا المدرب والعميل في منتج واحد"))}</span></div>
+                    <div class="hero-stat"><strong>AR/EN</strong><span>${escapeHtml(tr("Arabic and English are first-class", "العربية والإنجليزية من الأساس"))}</span></div>
+                    <div class="hero-stat"><strong>7d</strong><span>${escapeHtml(tr("Live launch trial from the current package catalog", "تجربة إطلاق من الكتالوج الحي الحالي"))}</span></div>
+                  </div>
+                </article>
+                <aside class="hero-panel stack">
+                  <div class="notice-strip">${icon("shield")}<div><strong>${escapeHtml(tr("Built for premium launch quality", "مبني لإطلاق احترافي"))}</strong><p class="body-copy">${escapeHtml(tr("The public journey stays clear, bilingual, and mobile-ready while access, package state, and workspace boundaries remain controlled behind the scenes.", "تبقى الرحلة العامة واضحة وثنائية اللغة وجاهزة للجوال بينما تظل حالة الباقة والوصول وحدود مساحة العمل مضبوطة خلف الكواليس."))}</p></div></div>
+                  <div class="card">
+                    <p class="card-kicker">${escapeHtml(tr("For trainers", "للمدربين"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Turn coaching delivery into a real operating system", "حوّل تقديم التدريب إلى نظام تشغيل حقيقي"))}</h3>
+                    ${renderPublicChecklist([
+                      tr("Organize clients, plans, check-ins, and communication from one workspace instead of across scattered chats and notes.", "نظّم العملاء والخطط والمتابعات والتواصل من مساحة واحدة بدل الدردشات والملاحظات المتفرقة."),
+                      tr("Bring onboarding, accountability, and follow-up into a flow your team can repeat with confidence.", "اجمع التهيئة والانضباط والمتابعة في مسار يستطيع فريقك تكراره بثقة."),
+                      tr("Scale from solo coaching to a studio setup without changing the product story for your clients.", "انتقل من التدريب الفردي إلى إعداد الاستوديو بدون تغيير قصة المنتج أمام عملائك."),
+                    ])}
+                  </div>
+                  <div class="card">
+                    <p class="card-kicker">${escapeHtml(tr("For clients", "للعملاء"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Make the next step obvious every day", "اجعل الخطوة التالية واضحة كل يوم"))}</h3>
+                    ${renderPublicChecklist([
+                      tr("See today's workout, the next check-in, reminders, and progress in one clear mobile-ready place.", "شاهد تمرين اليوم والمتابعة القادمة والتنبيهات والتقدم في مكان واحد واضح وجاهز للجوال."),
+                      tr("Respond to structured coaching prompts instead of trying to remember everything in chat.", "استجب لأسئلة تدريبية منظمة بدل محاولة تذكر كل شيء داخل المحادثة."),
+                      tr("Start independently now, then join a trainer later without losing your momentum.", "ابدأ بشكل مستقل الآن ثم انضم إلى مدرب لاحقًا بدون أن تخسر زخمك."),
+                    ])}
+                  </div>
+                </aside>
+              </div>
+            </section>
+
+            <section class="section"><div class="container stats-grid">
+              <div class="card"><p class="card-kicker">${escapeHtml(tr("Built for both sides", "مبني للطرفين"))}</p><h3 class="card-title">${escapeHtml(tr("One platform for delivery and transformation", "منصة واحدة للتشغيل والتحول"))}</h3><p class="body-copy">${escapeHtml(tr("Trainers get operational control, and clients get a clearer journey they can actually follow every week.", "يحصل المدرب على تحكم تشغيلي، ويحصل العميل على رحلة أوضح يمكنه الالتزام بها أسبوعًا بعد أسبوع."))}</p></div>
+              <div class="card"><p class="card-kicker">${escapeHtml(tr("End-to-end coaching flow", "رحلة تدريب كاملة"))}</p><h3 class="card-title">${escapeHtml(tr("Onboarding -> plan -> check-in -> progress -> follow-up", "تهيئة -> خطة -> متابعة -> تقدم -> متابعة تدريبية"))}</h3><p class="body-copy">${escapeHtml(tr("The product is strongest when the full coaching loop lives in one place instead of hopping between chats, notes, and spreadsheets.", "تكون المنصة أقوى عندما تعيش حلقة التدريب كاملة في مكان واحد بدل التنقل بين الدردشات والملاحظات والجداول."))}</p></div>
+              <div class="card"><p class="card-kicker">${escapeHtml(tr("Launch support", "دعم الإطلاق"))}</p><h3 class="card-title">${escapeHtml(tr("Human activation with clear next steps", "تفعيل بشري مع خطوات تالية واضحة"))}</h3><p class="body-copy">${escapeHtml(tr("Launch packages stay visible, and the activation path stays understandable for trainers, teams, and clients.", "تبقى باقات الإطلاق مرئية، ويبقى مسار التفعيل مفهومًا للمدربين والفرق والعملاء."))}</p></div>
+            </div></section>
+
+            <section class="section"><div class="container split-grid">
+              <article class="card">
+                <p class="card-kicker">${escapeHtml(tr("Launch packages", "باقات الإطلاق"))}</p>
+                <h3 class="section-title">${escapeHtml(tr("Public packages for a controlled rollout", "باقات عامة لإطلاق مضبوط"))}</h3>
+                <p class="body-copy">${escapeHtml(tr("Pricing on this page follows the live package catalog. Activation is still handled with human review so the right workspace gets the right access state.", "التسعير في هذه الصفحة يتبع كتالوج الباقات الحي. وما زال التفعيل يتم بمراجعة بشرية حتى تحصل مساحة العمل الصحيحة على حالة الوصول الصحيحة."))}</p>
+                <div class="package-grid" style="margin-top:16px;">${currentPackageCards()}</div>
+              </article>
+              <aside class="card">
+                <p class="card-kicker">${escapeHtml(tr("Next move", "الخطوة التالية"))}</p>
+                <h3 class="card-title">${escapeHtml(tr("Choose the path that matches your role", "اختر المسار الذي يناسب دورك"))}</h3>
+                ${renderPublicChecklist([
+                  tr("Trainers start with workspace creation and a package request.", "يبدأ المدربون بإنشاء مساحة العمل وطلب الباقة المناسبة."),
+                  tr("Clients can begin independently now, then join a trainer later through an invite.", "يمكن للعملاء البدء بشكل مستقل الآن ثم الانضمام إلى مدرب لاحقًا عبر دعوة."),
+                  tr("Launch support keeps the public experience clear while the backend access flow stays controlled.", "يحافظ دعم الإطلاق على وضوح التجربة العامة بينما يبقى مسار الوصول الخلفي مضبوطًا."),
+                ])}
+              </aside>
+            </div></section>
+
+            <section class="section"><div class="container">
+              <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Testimonials", "آراء العملاء"))}</p><h3 class="section-title">${escapeHtml(tr("Built for real coaching delivery", "مصمم لتقديم تدريب حقيقي"))}</h3></div></div>
+              <div class="testimonial-grid">
+                ${PUBLIC_TESTIMONIALS.map((item) => `<article class="card testimonial"><blockquote>${escapeHtml(isArabic() ? item.ar : item.en)}</blockquote><footer><strong>${escapeHtml(isArabic() ? item.name_ar : item.name_en)}</strong><br /><span class="muted">${escapeHtml(isArabic() ? item.role_ar : item.role_en)}</span></footer></article>`).join("")}
+              </div>
+            </div></section>
+
+            <section class="section"><div class="container">
+              <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("FAQ", "الأسئلة الشائعة"))}</p><h3 class="section-title">${escapeHtml(tr("Clear before you commit", "وضوح قبل الالتزام"))}</h3></div></div>
+              <div class="stack">${PUBLIC_FAQS.map((item) => `<article class="card"><h4 style="margin:0 0 10px">${escapeHtml(isArabic() ? item.ar_q : item.en_q)}</h4><p class="body-copy">${escapeHtml(isArabic() ? item.ar_a : item.en_a)}</p></article>`).join("")}</div>
+            </div></section>
+
+            <section class="section"><div class="container split-grid">
+              <article class="card">
+                <p class="card-kicker">${escapeHtml(tr("Start as a trainer", "ابدأ كمدرب"))}</p>
+                <h3 class="card-title">${escapeHtml(tr("Launch the coaching workspace that clients will actually use", "أطلق مساحة تدريب سيستخدمها العملاء فعلاً"))}</h3>
+                <p class="body-copy">${escapeHtml(tr("Create the account, choose the right package path, and move toward your first client setup.", "أنشئ الحساب واختر مسار الباقة المناسب وانتقل نحو إعداد أول عميل."))}</p>
+                <div class="hero-cta" style="margin-top:18px;">
+                  <a class="btn btn-primary" href="${pathToHash("/signup")}">${escapeHtml(tr("Start as a Trainer", "ابدأ كمدرب"))}</a>
+                </div>
+              </article>
+              <article class="card">
+                <p class="card-kicker">${escapeHtml(tr("Start as a client", "ابدأ كعميل"))}</p>
+                <h3 class="card-title">${escapeHtml(tr("Begin your fitness journey with a clearer next step", "ابدأ رحلتك الرياضية بخطوة تالية أوضح"))}</h3>
+                <p class="body-copy">${escapeHtml(tr("See the client journey, then start with a standalone account or ask about trainer-linked onboarding.", "اطلع على رحلة العميل ثم ابدأ بحساب مستقل أو اسأل عن التهيئة المرتبطة بمدرب."))}</p>
+                <div class="hero-cta" style="margin-top:18px;">
+                  <a class="btn btn-secondary" href="${pathToHash("/clients")}">${escapeHtml(tr("Start My Fitness Journey", "ابدأ رحلتي الرياضية"))}</a>
+                </div>
+              </article>
+            </div></section>
+          `;
+        }
+
+        function renderPublicRoute() {
+          const path = state.route.path;
+          if (path === "/home") return renderPublicHome();
+          if (path === "/trainers") return renderPublicTrainerPage();
+          if (path === "/clients") return renderPublicClientsPage();
+          if (path === "/packages") return renderPublicPackagesPage();
+          if (path === "/faq") return renderPublicFaqPage();
+          if (path === "/contact") return "";
+          if (path === "/privacy") return renderPublicLegalPage(
+            tr("Privacy Policy", "سياسة الخصوصية"),
+            tr("GrindCTRL stores permanent product records in Supabase/Postgres and uses operational tooling only to support the product experience.", "يخزن GrindCTRL السجلات الدائمة للمنتج في Supabase/Postgres ويستخدم أدوات التشغيل فقط لدعم تجربة المنتج."),
+            [
+              { kicker: tr("What we keep", "ما الذي نحتفظ به"), title: tr("Account, workspace, and coaching records", "سجلات الحساب ومساحة العمل والتدريب"), body: tr("Core product records such as accounts, memberships, plans, check-ins, and access states are stored in the product database.", "تُخزن سجلات المنتج الأساسية مثل الحسابات والعضويات والخطط والمتابعات وحالات الوصول داخل قاعدة بيانات المنتج.") },
+              { kicker: tr("What we do not do", "ما الذي لا نفعله"), title: tr("Automation does not become the hidden owner of business truth", "الأتمتة لا تصبح مالك الحقيقة التجاري الخفي"), body: tr("Automation may support reminders, notifications, and recovery flows, but permanent business truth remains in the main product backend.", "قد تدعم الأتمتة التذكيرات والتنبيهات وتدفقات الاسترداد، لكن الحقيقة التجارية الدائمة تبقى في الخلفية الرئيسية للمنتج.") },
+            ],
+          );
+          if (path === "/terms") return renderPublicLegalPage(
+            tr("Terms", "الشروط"),
+            tr("Launch packages are currently activated with human review so access can stay aligned with the right workspace and package state.", "تُفعّل باقات الإطلاق حاليًا بمراجعة بشرية حتى يبقى الوصول متوافقًا مع مساحة العمل وحالة الباقة الصحيحة."),
+            [
+              { kicker: tr("Access", "الوصول"), title: tr("Package state can affect what a workspace can do", "قد تؤثر حالة الباقة في ما تستطيع مساحة العمل فعله"), body: tr("A workspace may move into a read-only grace state when access expires or needs review, while core data remains preserved.", "قد تنتقل مساحة العمل إلى فترة سماح للقراءة فقط عند انتهاء الوصول أو حاجته للمراجعة، مع بقاء البيانات الأساسية محفوظة.") },
+              { kicker: tr("Launch model", "نموذج الإطلاق"), title: tr("Manual activation is part of the current rollout", "التفعيل اليدوي جزء من الإطلاق الحالي"), body: tr("Unless otherwise stated, package requests and activation reviews are handled with a human launch workflow instead of instant self-serve billing.", "ما لم يُذكر خلاف ذلك، تُدار طلبات الباقات ومراجعات التفعيل عبر مسار إطلاق بشري بدل فوترة فورية ذاتية الخدمة.") },
+            ],
+          );
+          if (path === "/cookies") return renderPublicLegalPage(
+            tr("Cookie Policy", "سياسة الكوكيز"),
+            tr("The app uses local storage and related browser persistence to preserve language, theme, session continuity, and other product experience settings.", "يستخدم التطبيق التخزين المحلي وما يشبهه من حفظ المتصفح للحفاظ على اللغة والمظهر واستمرارية الجلسة وإعدادات التجربة الأخرى."),
+            [
+              { kicker: tr("Experience settings", "إعدادات التجربة"), title: tr("Language, theme, and session continuity", "اللغة والمظهر واستمرارية الجلسة"), body: tr("Browser storage helps the app remember language choice, theme preference, session continuity, and selected interface states.", "يساعد حفظ المتصفح التطبيق على تذكر اختيار اللغة وتفضيل المظهر واستمرارية الجلسة وبعض حالات الواجهة المختارة.") },
+              { kicker: tr("Current scope", "النطاق الحالي"), title: tr("Operational use, not a marketing data grab", "استخدام تشغيلي لا جمع تسويقي مبالغ فيه"), body: tr("The current storage usage is centered on product operation and continuity rather than building a broad marketing profile.", "يركز الاستخدام الحالي للتخزين على تشغيل المنتج واستمراريته لا على بناء ملف تسويقي واسع.") },
+            ],
+          );
+          return "";
+        }
+
+        function renderContactPage() {
+          const packages = state.packages.length ? state.packages : PUBLIC_FALLBACK_PACKAGES;
+          const requestedPackage = String(state.route.query.get("packageCode") || "").trim();
+          return renderSimplePage(
+            tr("Contact", "تواصل"),
+            tr("Request a launch review", "اطلب مراجعة إطلاق"),
+            tr("Use this form for package questions, rollout planning, demos, or trainer-first launch support. We will map the current public catalog to the right workspace path.", "استخدم هذا النموذج لأسئلة الباقات أو تخطيط الإطلاق أو العروض أو دعم الإطلاق للمدربين. سنربط الكتالوج العام الحالي بمسار مساحة العمل المناسب."),
+            `
+              <section class="split-grid">
+                <form id="lead-form" class="card">
+                  <div class="field-grid">
+                    <div class="field"><label>${escapeHtml(tr("Name", "الاسم"))}</label><input class="input" type="text" name="name" placeholder="${escapeHtml(tr("Your full name", "اسمك الكامل"))}" /></div>
+                    <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" placeholder="coach@example.com" required /></div>
+                    <div class="field"><label>${escapeHtml(tr("Phone", "الهاتف"))}</label><input class="input" type="text" name="phone" placeholder="+966..." /></div>
+                    <div class="field"><label>${escapeHtml(tr("Package interest", "الباقة المهتم بها"))}</label><select class="select" name="packageCode">${packages.map((pkg) => `<option value="${escapeHtml(pkg.code)}"${requestedPackage === pkg.code ? " selected" : ""}>${escapeHtml(packageName(pkg))}</option>`).join("")}</select></div>
+                  </div>
+                  <div class="field-grid" style="margin-top:16px;">
+                    <div class="field"><label>${escapeHtml(tr("I am contacting you as", "أتواصل بصفتي"))}</label><select class="select" name="contactRole"><option value="trainer">${escapeHtml(tr("Trainer / coach / gym owner", "مدرب / كوتش / مالك نادي"))}</option><option value="client">${escapeHtml(tr("Client / trainee", "عميل / متدرب"))}</option><option value="ops">${escapeHtml(tr("Team / operations lead", "فريق / مسؤول تشغيل"))}</option></select></div>
+                    <div class="field"><label>${escapeHtml(tr("Preferred timeline", "التوقيت المفضل"))}</label><select class="select" name="timeline"><option value="asap">${escapeHtml(tr("As soon as possible", "في أقرب وقت"))}</option><option value="this_month">${escapeHtml(tr("This month", "هذا الشهر"))}</option><option value="planning">${escapeHtml(tr("Still planning", "ما زلت في مرحلة التخطيط"))}</option></select></div>
+                  </div>
+                  <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("What do you need?", "ماذا تحتاج؟"))}</label><textarea class="textarea" name="note" placeholder="${escapeHtml(tr("Tell us about your coaching model, current client load, language needs, or rollout plan.", "أخبرنا عن نموذج التدريب وعدد العملاء الحالي واحتياج اللغة أو خطة الإطلاق."))}"></textarea></div>
+                  <input type="hidden" name="language" value="${escapeHtml(state.language)}" />
+                  <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Send request", "إرسال الطلب"))}</button></div>
+                </form>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("What happens next", "ماذا يحدث بعد ذلك"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("We turn the request into a clear launch path", "نحوّل الطلب إلى مسار إطلاق واضح"))}</h3>
+                  ${renderPublicChecklist([
+                    tr("We review your package fit, current setup, and whether you are launching as a trainer or starting as a client.", "نراجع ملاءمة الباقة وإعدادك الحالي وما إذا كنت تطلق كمدرب أو تبدأ كعميل."),
+                    tr("If needed, we recommend the right launch package from the live catalog and explain the next activation step.", "عند الحاجة نرشح باقة الإطلاق المناسبة من الكتالوج الحي ونشرح خطوة التفعيل التالية."),
+                    tr("You keep a clear public entry path now without losing the controlled backend activation flow.", "تحافظ على مسار دخول عام واضح الآن بدون خسارة مسار التفعيل الخلفي المضبوط."),
+                  ])}
+                </article>
+              </section>
+            `,
+          );
+        }
+
         function renderLoginPage() {
+          const inviteToken = state.route.query.get("token") || currentInviteToken();
           return renderAuthLayout(
             tr("Login", "دخول"),
             tr("Re-enter the workspace with context intact", "ادخل إلى مساحة العمل مع بقاء السياق"),
             tr("Use password login or send a magic link. Google OAuth stays available for production setups that enable it in Supabase.", "استخدم كلمة المرور أو رابطًا سحريًا. تسجيل Google متاح عندما يتم تفعيله في Supabase."),
             `
+              ${inviteToken ? `<div class="notice-strip">${icon("shield")}<div><strong>${escapeHtml(tr("Invite continuity is active", "استمرار الدعوة مفعّل"))}</strong><p class="body-copy">${escapeHtml(tr("Login with the same email that received the invite so the trainer relationship can attach to the correct account.", "سجّل الدخول بنفس البريد الذي استلم الدعوة حتى ترتبط علاقة المدرب بالحساب الصحيح."))}</p></div></div>` : ""}
               <form id="login-password-form" class="card">
                 <p class="card-kicker">${escapeHtml(tr("Password", "كلمة المرور"))}</p>
                 <div class="field-grid">
@@ -1598,8 +2652,9 @@
         }
 
         function renderSignupPage() {
-          const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
+          const inviteToken = state.route.query.get("token") || currentInviteToken();
           const inviteMode = Boolean(inviteToken);
+          const suggestedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
           return renderAuthLayout(
             tr("Signup", "إنشاء حساب"),
             inviteMode ? tr("Create an account and join the invitation", "أنشئ حسابًا ثم انضم إلى الدعوة") : tr("Launch the right journey from day one", "ابدأ المسار الصحيح من اليوم الأول"),
@@ -1609,14 +2664,13 @@
             `
               ${inviteMode ? `<div class="notice-strip">${icon("shield")}<div><strong>${escapeHtml(tr("Invite token saved", "تم حفظ رمز الدعوة"))}</strong><p class="body-copy">${escapeHtml(tr("Finish signup, verify your email, then accept the invite.", "أكمل التسجيل وتحقق من بريدك ثم اقبل الدعوة."))}</p></div></div>` : ""}
               <form id="signup-form" class="card">
-                <div class="notice-strip" style="margin-bottom:18px;">${icon("mail")}<div><strong>${escapeHtml(tr("Email-link signup", "ØªØ³Ø¬ÙŠÙ„ Ø¨Ø±Ø§Ø¨Ø· Ø¨Ø±ÙŠØ¯"))}</strong><p class="body-copy">${escapeHtml(tr("This flow now sends a secure email link to finish account creation. If this email already has an account, use Login instead.", "Ù‡Ø°Ø§ Ø§Ù„Ù…Ø³Ø§Ø± ÙŠØ±Ø³Ù„ Ø§Ù„Ø¢Ù† Ø±Ø§Ø¨Ø·Ù‹Ø§ Ø¢Ù…Ù†Ù‹Ø§ Ø¹Ø¨Ø± Ø§Ù„Ø¨Ø±ÙŠØ¯ Ù„Ø¥ÙƒÙ…Ø§Ù„ Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨. Ø¥Ø°Ø§ ÙƒØ§Ù† Ù„Ù‡Ø°Ø§ Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø­Ø³Ø§Ø¨ Ù…ÙˆØ¬ÙˆØ¯ ÙØ§Ø³ØªØ®Ø¯Ù… ØµÙØ­Ø© Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø¨Ø¯Ù„Ù‹Ø§ Ù…Ù† Ø°Ù„Ùƒ."))}</p></div></div>
+                <div class="notice-strip" style="margin-bottom:18px;">${icon("mail")}<div><strong>${escapeHtml(tr("Email-link signup", "التسجيل برابط البريد"))}</strong><p class="body-copy">${escapeHtml(tr("This flow now sends a secure email link to finish account creation. If this email already has an account, use Login instead.", "هذا المسار يرسل الآن رابطاً آمناً عبر البريد لإكمال إنشاء الحساب. إذا كان لهذا البريد حساب موجود فاستخدم صفحة الدخول بدلاً من ذلك."))}</p></div></div>
                 <div class="field-grid">
                   <div class="field"><label>${escapeHtml(tr("Full name", "الاسم الكامل"))}</label><input class="input" type="text" name="fullName" required /></div>
                   <div class="field"><label>${escapeHtml(tr("Email", "البريد الإلكتروني"))}</label><input class="input" type="email" name="email" required /></div>
-                  <div class="field"><label>${escapeHtml(tr("Password", "كلمة المرور"))}</label><input class="input" type="password" name="password" minlength="8" required /><small>${escapeHtml(tr("Minimum 8 characters.", "8 أحرف على الأقل."))}</small></div>
                   <div class="field"><label>${escapeHtml(tr("Language", "اللغة"))}</label><select class="select" name="language"><option value="en"${!isArabic() ? " selected" : ""}>English</option><option value="ar"${isArabic() ? " selected" : ""}>العربية</option></select></div>
                   <div class="field"><label>${escapeHtml(tr("Account type", "نوع الحساب"))}</label><select class="select" name="accountType"><option value="trainer"${inviteMode ? "" : " selected"}>${escapeHtml(tr("Trainer owner", "مدرب / مالك"))}</option><option value="client"${inviteMode ? " selected" : ""}>${escapeHtml(tr("Standalone client", "عميل مستقل"))}</option></select></div>
-                  <div class="field"><label>${escapeHtml(tr("Timezone", "المنطقة الزمنية"))}</label><input class="input" type="text" name="timezone" value="America/Los_Angeles" /></div>
+                  <div class="field"><label>${escapeHtml(tr("Timezone", "المنطقة الزمنية"))}</label><input class="input" type="text" name="timezone" value="${escapeHtml(suggestedTimezone)}" /></div>
                 </div>
                 <div class="card" style="margin-top:18px;">
                   <p class="card-kicker">${escapeHtml(tr("Trainer setup", "إعداد المدرب"))}</p>
@@ -1637,7 +2691,7 @@
                   </div>
                 </div>
                 <div class="form-actions" style="margin-top:18px;">
-                  <button class="btn btn-primary" type="submit">${escapeHtml(tr("Create account", "إنشاء الحساب"))}</button>
+                  <button class="btn btn-primary" type="submit">${escapeHtml(tr("Send signup link", "إرسال رابط التسجيل"))}</button>
                   <button class="btn btn-ghost" type="button" data-action="start-google">${escapeHtml(tr("Continue with Google", "المتابعة عبر Google"))}</button>
                 </div>
               </form>
@@ -1648,6 +2702,7 @@
         function renderVerifyPage() {
           const hasSession = Boolean(state.session?.access_token);
           const pendingEmail = readString(STORAGE_KEYS.pendingEmail, "");
+          const inviteToken = currentInviteToken();
           return renderAuthLayout(
             tr("Verify", "تحقق"),
             hasSession ? tr("Verification complete", "اكتمل التحقق") : tr("Verify your email", "تحقق من بريدك"),
@@ -1659,7 +2714,7 @@
                 <div class="card">
                   <p class="body-copy">${escapeHtml(tr("The app will continue to workspace bootstrap or invite acceptance if either flow is pending.", "سيكمل التطبيق تهيئة مساحة العمل أو قبول الدعوة إذا كان أحد المسارين معلقًا."))}</p>
                   <div class="form-actions" style="margin-top:18px;">
-                    <a class="btn btn-primary" href="${pathToHash(readString(STORAGE_KEYS.invite, "") ? `/invite?token=${encodeURIComponent(readString(STORAGE_KEYS.invite, ""))}` : defaultAppRoute())}">${escapeHtml(tr("Continue", "متابعة"))}</a>
+                    <a class="btn btn-primary" href="${pathToHash(inviteToken ? `/invite?token=${encodeURIComponent(inviteToken)}` : defaultAppRoute())}">${escapeHtml(tr("Continue", "متابعة"))}</a>
                   </div>
                 </div>
               `
@@ -1708,8 +2763,24 @@
         }
 
         function renderInvitePage() {
-          const token = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
-          if (token) writeString(STORAGE_KEYS.invite, token);
+          const token = state.route.query.get("token") || currentInviteToken();
+          if (!token) {
+            return renderAuthLayout(
+              tr("Invitation", "الدعوة"),
+              tr("Continue from the invite email", "تابع من رسالة الدعوة"),
+              tr("Open the latest invite link from your trainer or ask for a fresh invite if this token is missing.", "افتح أحدث رابط دعوة من مدربك أو اطلب دعوة جديدة إذا كان الرمز غير موجود."),
+              `
+                <div class="card">
+                  <p class="body-copy">${escapeHtml(tr("Invite acceptance is only available from a live invite link.", "قبول الدعوة متاح فقط من خلال رابط دعوة فعّال."))}</p>
+                  <div class="form-actions" style="margin-top:18px;">
+                    <a class="btn btn-primary" href="${pathToHash("/login")}">${escapeHtml(tr("Go to login", "اذهب إلى الدخول"))}</a>
+                    <a class="btn btn-secondary" href="${pathToHash("/contact")}">${escapeHtml(tr("Contact support", "تواصل مع الدعم"))}</a>
+                  </div>
+                </div>
+              `,
+            );
+          }
+          saveInviteToken(token);
           return renderAuthLayout(
             tr("Invitation", "الدعوة"),
             tr("Join the workspace safely", "انضم إلى مساحة العمل بأمان"),
@@ -1741,7 +2812,7 @@
             <div class="card">
               <p class="card-kicker">${escapeHtml(tr("Restricted", "مقيد"))}</p>
               <h2 class="card-title">${escapeHtml(tr("You do not have access to this route", "ليس لديك صلاحية لهذه الصفحة"))}</h2>
-              <p class="body-copy">${escapeHtml(tr("The route is protected by role-aware navigation and Supabase-backed access control.", "هذه الصفحة محمية بالتنقل حسب الدور وبالتحكم في الوصول المعتمد على Supabase."))}</p>
+              <p class="body-copy">${escapeHtml(tr("This screen needs a matching role and live workspace access from Supabase. If you expected access, re-open the correct invite or sign in with the right account.", "تحتاج هذه الشاشة إلى دور مطابق ووصول فعلي لمساحة العمل من Supabase. إذا كنت تتوقع الوصول، فأعد فتح الدعوة الصحيحة أو سجّل الدخول بالحساب الصحيح."))}</p>
               <div class="form-actions" style="margin-top:18px;"><a class="btn btn-primary" href="${pathToHash(defaultAppRoute())}">${escapeHtml(tr("Go to my home", "اذهب إلى واجهتي"))}</a></div>
             </div>
           `;
@@ -1762,7 +2833,7 @@
                   ${state.workspaceAccess ? statusPill(state.workspaceAccess.status) : ""}
                 </div>
               </div>
-              ${isReadOnlyWorkspace() ? `<div class="notice-strip warning">${icon("shield")}<div><strong>${escapeHtml(tr("Read-only grace is active", "فترة القراءة فقط نشطة"))}</strong><p class="body-copy">${escapeHtml(tr("Data remains visible, but write actions should be limited until access is restored.", "البيانات تبقى مرئية لكن يجب تقليل التعديلات حتى استعادة الوصول."))}</p></div></div>` : ""}
+              ${isReadOnlyWorkspace() ? `<div class="notice-strip warning">${icon("shield")}<div><strong>${escapeHtml(tr("Read-only grace is active", "فترة القراءة فقط نشطة"))}</strong><p class="body-copy">${escapeHtml(tr("Data stays visible, but write actions are blocked until access is restored.", "تبقى البيانات مرئية، لكن إجراءات التعديل متوقفة حتى تتم استعادة الوصول."))}</p></div></div>` : ""}
             </section>
           `;
         }
@@ -1803,7 +2874,37 @@
           `;
         }
 
-        function renderTrainerDashboard(data) {
+        function clientDisplayName(row) {
+          return pick(row, ["client_name", "display_name", "full_name", "name", "client_user_id"], tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"));
+        }
+
+        function planClientName(row) {
+          return pick(row, ["client_name", "display_name", "client_user_id"], tr("Unassigned", "ØºÙŠØ± Ù…Ø¹ÙŠÙ†"));
+        }
+
+        function metricValueLabel(row) {
+          const value = pick(row, ["metric_value", "value"], "-");
+          const unit = pick(row, ["metric_unit"], "");
+          return `${value}${unit ? ` ${unit}` : ""}`.trim();
+        }
+
+        function latestMetric(rows, key) {
+          return (rows || []).find((row) => pick(row, ["metric_key", "metric_type"], "") === key) || null;
+        }
+
+        function groupProgramRows(rows) {
+          const grouped = [];
+          const byWeek = new Map();
+          (rows || []).forEach((row) => {
+            const week = Number(pick(row, ["week_number"], 0)) || 0;
+            if (!byWeek.has(week)) byWeek.set(week, []);
+            byWeek.get(week).push(row);
+          });
+          Array.from(byWeek.keys()).sort((a, b) => a - b).forEach((week) => grouped.push({ week, rows: byWeek.get(week) }));
+          return grouped;
+        }
+
+        function legacyRenderTrainerDashboard(data) {
           const home = data.home || {};
           return `
             <div class="stack">
@@ -1838,7 +2939,7 @@
           `;
         }
 
-        function renderTrainerClients(data) {
+        function legacyRenderTrainerClients(data) {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -1866,7 +2967,7 @@
           `;
         }
 
-        function renderTrainerPrograms(data) {
+        function legacyRenderTrainerPrograms(data) {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -1896,7 +2997,7 @@
           `;
         }
 
-        function renderTrainerCheckins(data) {
+        function legacyRenderTrainerCheckins(data) {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -1923,7 +3024,7 @@
           `;
         }
 
-        function renderMessages(data) {
+        function legacyRenderMessages(data) {
           const selectedThreadId = state.ui.selectedThreadId;
           const selectedThread = (data.threads || []).find((row) => row.id === selectedThreadId) || data.threads?.[0];
           return `
@@ -1952,7 +3053,7 @@
           `;
         }
 
-        function renderCalendar(data) {
+        function legacyRenderCalendar(data) {
           return `
               <div class="stack">
                 ${currentRole() === "trainer" ? `
@@ -1978,7 +3079,7 @@
             `;
         }
 
-        function renderFiles() {
+        function legacyRenderFiles() {
           return `
               <div class="stack">
                 <form id="file-upload-form" class="card">
@@ -2003,7 +3104,7 @@
             `;
         }
 
-        function renderAnalytics(data) {
+        function legacyRenderAnalytics(data) {
           const latest = data.metrics?.[0] || {};
           return `
             <div class="stack">
@@ -2025,7 +3126,7 @@
           `;
         }
 
-        function renderTrainerBilling(data) {
+        function legacyRenderTrainerBilling(data) {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -2058,7 +3159,7 @@
           `;
         }
 
-        function renderSettings() {
+        function legacyRenderSettings() {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -2096,7 +3197,7 @@
           `;
         }
 
-        function renderClientHome(data) {
+        function legacyRenderClientHome(data) {
           const today = data.today || {};
           return `
             <div class="stack">
@@ -2126,7 +3227,7 @@
           `;
         }
 
-        function renderClientPlan(data) {
+        function legacyRenderClientPlan(data) {
           return `
             <div class="stack">
               <section class="card">
@@ -2141,7 +3242,7 @@
           `;
         }
 
-        function renderClientCheckins(data) {
+        function legacyRenderClientCheckins(data) {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -2172,7 +3273,7 @@
           `;
         }
 
-        function renderClientProgress(data) {
+        function legacyRenderClientProgress(data) {
           return `
             <div class="stack">
               <section class="split-grid">
@@ -2201,8 +3302,395 @@
           `;
         }
 
-        function renderClientAccount() {
+        function legacyRenderClientAccount() {
           return renderSettings();
+        }
+
+        function renderTrainerDashboard(data) {
+          const home = data.home || {};
+          return `
+            <div class="stack">
+              <section class="kpi-grid">
+                ${summaryCard(tr("Active clients", "Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡ Ø§Ù„Ù†Ø´Ø·ÙˆÙ†"), formatNumber(pick(home, ["active_clients", "active_client_count", "client_count"], 0)))}
+                ${summaryCard(tr("Pending check-ins", "Ø§Ù„ØªÙ‚ÙŠÙŠÙ…Ø§Øª Ø§Ù„Ù…Ø¹Ù„Ù‚Ø©"), formatNumber(pick(home, ["pending_checkins", "pending_checkin_count"], 0)))}
+                ${summaryCard(tr("Unread messages", "Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ ØºÙŠØ± Ø§Ù„Ù…Ù‚Ø±ÙˆØ¡Ø©"), formatNumber(pick(home, ["unread_messages", "unread_message_count"], 0)))}
+                ${summaryCard(tr("Upcoming sessions", "Ø§Ù„Ø¬Ù„Ø³Ø§Øª Ø§Ù„Ù‚Ø§Ø¯Ù…Ø©"), formatNumber(pick(home, ["upcoming_appointments", "upcoming_sessions"], 0)))}
+              </section>
+              <section class="split-grid">
+                <article class="card">
+                  <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Urgent queue", "Ø§Ù„Ø·Ø§Ø¨ÙˆØ± Ø§Ù„Ø¹Ø§Ø¬Ù„"))}</p><h3 class="card-title">${escapeHtml(tr("What needs action now", "Ù…Ø§ Ø§Ù„Ø°ÙŠ ÙŠØ­ØªØ§Ø¬ ØªØ¯Ø®Ù„Ø§Ù‹ Ø§Ù„Ø¢Ù†"))}</h3></div><a class="btn btn-secondary" href="${pathToHash("/app/trainer/clients")}">${escapeHtml(tr("Add client", "Ø¥Ø¶Ø§ÙØ© Ø¹Ù…ÙŠÙ„"))}</a></div>
+                  <div class="stack">
+                    ${(data.queue || []).length ? data.queue.map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(pick(row, ["title", "item_type", "priority_reason"], tr("Queue item", "Ø¹Ù†ØµØ± ÙÙŠ Ø§Ù„Ø·Ø§Ø¨ÙˆØ±")))}</strong>${statusPill(pick(row, ["status"], "open"))}</div><p class="timeline-copy">${escapeHtml(String(pick(row, ["summary", "priority_reason"], tr("Needs review.", "ÙŠØ­ØªØ§Ø¬ Ù…Ø±Ø§Ø¬Ø¹Ø©."))))}</p></article>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("Queue is clear", "Ø§Ù„Ø·Ø§Ø¨ÙˆØ± ÙØ§Ø±Øº"))}</strong><div>${escapeHtml(tr("No urgent trainer items right now.", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¹Ù†Ø§ØµØ± Ø¹Ø§Ø¬Ù„Ø© Ø§Ù„Ø¢Ù†."))}</div></div>`}
+                  </div>
+                </article>
+                <article class="card">
+                  <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Recent notices", "Ø¢Ø®Ø± Ø§Ù„ØªÙ†Ø¨ÙŠÙ‡Ø§Øª"))}</p><h3 class="card-title">${escapeHtml(tr("Keep the workspace moving", "Ø­Ø§ÙØ¸ Ø¹Ù„Ù‰ Ø­Ø±ÙƒØ© Ù…Ø³Ø§Ø­Ø© Ø§Ù„Ø¹Ù…Ù„"))}</h3></div><a class="btn btn-secondary" href="${pathToHash("/app/trainer/programs")}">${escapeHtml(tr("Create program", "Ø£Ù†Ø´Ø¦ Ø¨Ø±Ù†Ø§Ù…Ø¬Ù‹Ø§"))}</a></div>
+                  <div class="stack">
+                    ${(data.notices || []).length ? data.notices.map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(row.title)}</strong><span class="mini-badge">${escapeHtml(statusLabel(row.type))}</span></div><p class="timeline-copy">${escapeHtml(row.body)}</p></article>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No notices yet", "Ù„Ø§ ØªÙˆØ¬Ø¯ ØªÙ†Ø¨ÙŠÙ‡Ø§Øª Ø¨Ø¹Ø¯"))}</strong></div>`}
+                  </div>
+                </article>
+              </section>
+              <section class="card">
+                <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Clients", "Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡"))}</p><h3 class="card-title">${escapeHtml(tr("Latest client snapshot", "Ø£Ø­Ø¯Ø« Ù„Ù‚Ø·Ø© Ù„Ù„Ø¹Ù…Ù„Ø§Ø¡"))}</h3></div><a class="btn btn-secondary" href="${pathToHash("/app/trainer/clients")}">${escapeHtml(tr("Open full client list", "Ø§ÙØªØ­ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡"))}</a></div>
+                ${dataTable(
+                  [tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"), tr("Status", "Ø§Ù„Ø­Ø§Ù„Ø©"), tr("Last check-in", "Ø¢Ø®Ø± ØªÙ‚ÙŠÙŠÙ…"), tr("Last active", "Ø¢Ø®Ø± Ù†Ø´Ø§Ø·"), tr("Next step", "Ø§Ù„Ø®Ø·ÙˆØ© Ø§Ù„ØªØ§Ù„ÙŠØ©")],
+                  (data.clients || []).map((row) => `<tr><td><strong>${escapeHtml(clientDisplayName(row))}</strong><br /><span class="muted">${escapeHtml(pick(row, ["goal_summary", "goal"], tr("Goal still missing", "Ø§Ù„Ù‡Ø¯Ù ØºÙŠØ± Ù…ÙƒØªÙ…Ù„")))}</span></td><td>${statusPill(pick(row, ["lifecycle_status", "status"], "active"))}</td><td>${escapeHtml(formatDate(pick(row, ["latest_checkin_date", "last_checkin_at"], null)))}</td><td>${escapeHtml(formatDate(pick(row, ["latest_snapshot_date", "last_activity_at"], null)))}</td><td><a class="mini-badge" href="${pathToHash(`/app/trainer/client?client=${encodeURIComponent(row.client_user_id || "")}`)}">${escapeHtml(tr("Open cockpit", "Ø§ÙØªØ­ Ø§Ù„ÙƒÙˆØ¨ÙŠØª"))}</a></td></tr>`),
+                )}
+              </section>
+            </div>
+          `;
+        }
+
+        function renderTrainerClients(data) {
+          const clients = data.clients || [];
+          const onboardingCount = clients.filter((row) => pick(row, ["lifecycle_status", "status"], "") === "onboarding").length;
+          const atRiskCount = clients.filter((row) => pick(row, ["lifecycle_status", "status"], "") === "churn_risk").length;
+          return `
+            <div class="stack">
+              <section class="kpi-grid">
+                ${summaryCard(tr("Total clients", "Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡"), formatNumber(clients.length))}
+                ${summaryCard(tr("Needs onboarding", "ÙŠØ­ØªØ§Ø¬ ØªÙ‡ÙŠØ¦Ø©"), formatNumber(onboardingCount))}
+                ${summaryCard(tr("At-risk clients", "Ø¹Ù…Ù„Ø§Ø¡ Ù…Ù‡Ø¯Ø¯ÙˆÙ†"), formatNumber(atRiskCount))}
+                ${summaryCard(tr("Follow-up focus", "Ø£ÙˆÙ„ÙˆÙŠØ© Ø§Ù„Ù…ØªØ§Ø¨Ø¹Ø©"), escapeHtml(clients[0] ? clientDisplayName(clients[0]) : tr("No client queued", "Ù„Ø§ Ø¹Ù…ÙŠÙ„ ÙÙŠ Ø§Ù„Ø·Ø§Ø¨ÙˆØ±")))}
+              </section>
+              <section class="split-grid">
+                <article class="card">
+                  <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Client list", "Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡"))}</p><h3 class="card-title">${escapeHtml(tr("Scan, search, and follow up", "Ø§Ø³ØªØ¹Ø±Ø¶ ÙˆØ§Ø¨Ø­Ø« ÙˆØªØ§Ø¨Ø¹"))}</h3></div></div>
+                  ${dataTable(
+                    [tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"), tr("Goal", "Ø§Ù„Ù‡Ø¯Ù"), tr("Status", "Ø§Ù„Ø­Ø§Ù„Ø©"), tr("Trainer link", "Ø§Ù„Ø§Ø±ØªØ¨Ø§Ø· Ø¨Ø§Ù„Ù…Ø¯Ø±Ø¨"), tr("Action", "Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡")],
+                    clients.map((row) => `<tr><td><strong>${escapeHtml(clientDisplayName(row))}</strong><br /><span class="muted">${escapeHtml(row.client_user_id || "")}</span></td><td>${escapeHtml(pick(row, ["goal_summary", "goal"], tr("No goal yet", "Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù‡Ø¯Ù Ø¨Ø¹Ø¯")))}</td><td>${statusPill(pick(row, ["lifecycle_status", "status"], "active"))}</td><td>${escapeHtml(pick(row, ["trainer_name", "primary_trainer_name"], tr("Assigned", "Ù…Ø±Ø¨ÙˆØ·")))}</td><td><div class="tag-row"><a class="mini-badge" href="${pathToHash(`/app/trainer/client?client=${encodeURIComponent(row.client_user_id || "")}`)}">${escapeHtml(tr("Open cockpit", "Ø§ÙØªØ­ Ø§Ù„ÙƒÙˆØ¨ÙŠØª"))}</a><a class="mini-badge" href="${pathToHash("/app/trainer/messages")}">${escapeHtml(tr("Message", "Ø±Ø³Ø§Ù„Ø©"))}</a></div></td></tr>`),
+                  )}
+                </article>
+                <aside class="stack">
+                  <form id="trainer-invite-form" class="card">
+                    <p class="card-kicker">${escapeHtml(tr("Invite flow", "Ù…Ø³Ø§Ø± Ø§Ù„Ø¯Ø¹ÙˆØ©"))}</p>
+                    <h3 class="card-title">${escapeHtml(tr("Invite a client or staff member", "Ø§Ø¯Ø¹Ù Ø¹Ù…ÙŠÙ„Ù‹Ø§ Ø£Ùˆ Ø¹Ø¶ÙˆÙ‹Ø§ Ù…Ù† Ø§Ù„Ø·Ø§Ù‚Ù…"))}</h3>
+                    <div class="field-grid">
+                      <div class="field"><label>${escapeHtml(tr("Email", "Ø§Ù„Ø¨Ø±ÙŠØ¯"))}</label><input class="input" type="email" name="email" required /></div>
+                      <div class="field"><label>${escapeHtml(tr("Invite type", "Ù†ÙˆØ¹ Ø§Ù„Ø¯Ø¹ÙˆØ©"))}</label><select class="select" name="inviteType"><option value="client">${escapeHtml(tr("Client", "Ø¹Ù…ÙŠÙ„"))}</option><option value="staff">${escapeHtml(tr("Staff", "Ø·Ø§Ù‚Ù…"))}</option></select></div>
+                    </div>
+                    <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Optional note", "Ù…Ù„Ø§Ø­Ø¸Ø© Ø§Ø®ØªÙŠØ§Ø±ÙŠØ©"))}</label><input class="input" type="text" name="note" /></div>
+                    <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Send invite", "Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„Ø¯Ø¹ÙˆØ©"))}</button></div>
+                  </form>
+                </aside>
+              </section>
+            </div>
+          `;
+        }
+
+        function renderTrainerClientDetail(data) {
+          const detail = data.detail;
+          const checkins = data.checkins || [];
+          const progress = data.progress || [];
+          if (!detail) return `<div class="empty-state"><strong>${escapeHtml(tr("Choose a client first", "Ø§Ø®ØªØ± Ø¹Ù…ÙŠÙ„Ù‹Ø§ Ø£ÙˆÙ„Ù‹Ø§"))}</strong><div>${escapeHtml(tr("Open the clients list, then jump into the client cockpit from there.", "Ø§ÙØªØ­ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡ Ø£ÙˆÙ„Ù‹Ø§ØŒ Ø«Ù… Ø§Ø¯Ø®Ù„ Ø¥Ù„Ù‰ ÙƒÙˆØ¨ÙŠØª Ø§Ù„Ø¹Ù…ÙŠÙ„ Ù…Ù†Ù‡Ø§."))}</div><div class="form-actions" style="margin-top:18px;"><a class="btn btn-primary" href="${pathToHash("/app/trainer/clients")}">${escapeHtml(tr("Open clients", "Ø§ÙØªØ­ Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡"))}</a></div></div>`;
+          const latestCheckin = checkins[0] || null;
+          const latestWeight = latestMetric(progress, "weight");
+          const latestWaist = latestMetric(progress, "waist");
+          return `
+            <div class="stack">
+              <section class="split-grid">
+                <article class="hero-card">
+                  <p class="card-kicker">${escapeHtml(tr("Client cockpit", "ÙƒÙˆØ¨ÙŠØª Ø§Ù„Ø¹Ù…ÙŠÙ„"))}</p>
+                  <h2 class="section-title">${escapeHtml(clientDisplayName(detail))}</h2>
+                  <p class="lead">${escapeHtml(pick(detail, ["goal_summary", "goal", "desired_outcome"], tr("No clear goal has been captured yet. Use the next check-in to tighten the target and timeline.", "Ù„Ù… ÙŠÙØ­Ø¯Ø¯ Ù‡Ø¯Ù ÙˆØ§Ø¶Ø­ Ø¨Ø¹Ø¯. Ø§Ø³ØªØ®Ø¯Ù… Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ù‚Ø§Ø¯Ù… Ù„ØªØ´Ø¯ÙŠØ¯ Ø§Ù„Ù‡Ø¯Ù ÙˆØ§Ù„Ø¬Ø¯ÙˆÙ„ Ø§Ù„Ø²Ù…Ù†ÙŠ.")))}</p>
+                  <div class="tag-row">${statusPill(pick(detail, ["lifecycle_status", "status"], "active"))}<span class="mini-badge">${escapeHtml(pick(detail, ["training_environment", "environment", "preferred_environment"], tr("Environment not set", "Ø§Ù„Ø¨ÙŠØ¦Ø© ØºÙŠØ± Ù…Ø­Ø¯Ø¯Ø©")))}</span><span class="mini-badge">${escapeHtml(pick(detail, ["experience_level", "training_experience"], tr("Experience not set", "Ø§Ù„Ø®Ø¨Ø±Ø© ØºÙŠØ± Ù…Ø­Ø¯Ø¯Ø©")))}</span></div>
+                  <div class="hero-cta" style="margin-top:18px;"><a class="btn btn-primary" href="${pathToHash("/app/trainer/checkins")}">${escapeHtml(tr("Create check-in", "Ø£Ù†Ø´Ø¦ ØªÙ‚ÙŠÙŠÙ…Ù‹Ø§"))}</a><a class="btn btn-secondary" href="${pathToHash("/app/trainer/messages")}">${escapeHtml(tr("Message client", "Ø±Ø§Ø³Ù„ Ø§Ù„Ø¹Ù…ÙŠÙ„"))}</a></div>
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Next coach move", "Ø®Ø·ÙˆØ© Ø§Ù„Ù…Ø¯Ø±Ø¨ Ø§Ù„ØªØ§Ù„ÙŠØ©"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("What needs attention now", "Ù…Ø§ Ø§Ù„Ø°ÙŠ ÙŠØ­ØªØ§Ø¬ Ø§Ù†ØªØ¨Ø§Ù‡Ù‹Ø§ Ø§Ù„Ø¢Ù†"))}</h3>
+                  <ul class="clean-list">
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(pick(detail, ["top_obstacle", "main_obstacle", "obstacle_summary"], tr("Clarify the main obstacle and support style in the next touchpoint.", "Ø­Ø¯Ø¯ Ø§Ù„Ø¹Ø§Ø¦Ù‚ Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠ ÙˆØ£Ø³Ù„ÙˆØ¨ Ø§Ù„Ø¯Ø¹Ù… ÙÙŠ Ø§Ù„Ù„Ù‚Ø§Ø¡ Ø§Ù„Ù‚Ø§Ø¯Ù….")))}</div></li>
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(latestCheckin ? tr("Review the latest check-in before changing the plan.", "Ø±Ø§Ø¬Ø¹ Ø¢Ø®Ø± ØªÙ‚ÙŠÙŠÙ… Ù‚Ø¨Ù„ ØªØ¹Ø¯ÙŠÙ„ Ø§Ù„Ø®Ø·Ø©.") : tr("No check-in has been captured yet. Create the first guided check-in.", "Ù„Ù… ÙŠØªÙ… Ø§Ù„ØªÙ‚Ø§Ø· Ø£ÙŠ ØªÙ‚ÙŠÙŠÙ… Ø¨Ø¹Ø¯. Ø£Ù†Ø´Ø¦ Ø£ÙˆÙ„ ØªÙ‚ÙŠÙŠÙ… Ù…ÙˆØ¬Ù‡."))}</div></li>
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(latestWeight ? tr("Progress has live body data. Use it to anchor the next weekly target.", "ÙŠÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù† Ø­ÙŠ Ù„Ù„ØªÙ‚Ø¯Ù…. Ø§Ø³ØªØ®Ø¯Ù…Ù‡ Ù„ØªØ«Ø¨ÙŠØª Ù‡Ø¯Ù Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹ Ø§Ù„Ù‚Ø§Ø¯Ù….") : tr("Body progress is still thin. Prompt the client to log weight or measurements this week.", "Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„ØªÙ‚Ø¯Ù… Ø§Ù„Ø¬Ø³Ø¯ÙŠ Ù„Ø§ ØªØ²Ø§Ù„ Ø¶Ø¹ÙŠÙØ©. Ø§Ø·Ù„Ø¨ Ù…Ù† Ø§Ù„Ø¹Ù…ÙŠÙ„ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„ÙˆØ²Ù† Ø£Ùˆ Ø§Ù„Ù‚ÙŠØ§Ø³Ø§Øª Ù‡Ø°Ø§ Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹."))}</div></li>
+                  </ul>
+                </article>
+              </section>
+              <section class="kpi-grid">
+                ${summaryCard(tr("Readiness", "Ø§Ù„Ø¬Ø§Ù‡Ø²ÙŠØ©"), escapeHtml(String(pick(detail, ["readiness_score", "confidence_score"], tr("Not set", "ØºÙŠØ± Ù…Ø­Ø¯Ø¯")))))}
+                ${summaryCard(tr("Latest weight", "Ø¢Ø®Ø± ÙˆØ²Ù†"), escapeHtml(latestWeight ? metricValueLabel(latestWeight) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Latest waist", "Ø¢Ø®Ø± Ù…Ø­ÙŠØ· Ø®ØµØ±"), escapeHtml(latestWaist ? metricValueLabel(latestWaist) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Latest check-in", "Ø¢Ø®Ø± ØªÙ‚ÙŠÙŠÙ…"), escapeHtml(latestCheckin ? formatDate(latestCheckin.checkin_date) : tr("Not submitted", "Ù„Ù… ÙŠÙØ±Ø³Ù„")))}
+              </section>
+            </div>
+          `;
+        }
+
+        function renderTrainerPrograms(data) {
+          const clientsById = new Map((data.clients || []).map((row) => [row.client_user_id, row]));
+          return `
+            <div class="stack">
+              <section class="kpi-grid">
+                ${summaryCard(tr("Programs", "Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬"), formatNumber((data.plans || []).length))}
+                ${summaryCard(tr("Assigned clients", "Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡ Ø§Ù„Ù…Ø±Ø¨ÙˆØ·ÙˆÙ†"), formatNumber((data.clients || []).length))}
+                ${summaryCard(tr("Draft focus", "Ø£ÙˆÙ„ÙˆÙŠØ© Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡"), escapeHtml(tr("Build the next phase with a clear goal and handoff note.", "Ø§Ø¨Ù†Ù Ø§Ù„Ù…Ø±Ø­Ù„Ø© Ø§Ù„ØªØ§Ù„ÙŠØ© Ø¨Ù‡Ø¯Ù ÙˆÙ…Ù„Ø§Ø­Ø¸Ø© ØªØ³Ù„ÙŠÙ… ÙˆØ§Ø¶Ø­Ø©.")))}
+                ${summaryCard(tr("Latest update", "Ø¢Ø®Ø± ØªØ­Ø¯ÙŠØ«"), escapeHtml((data.plans || [])[0] ? formatDate((data.plans || [])[0].updated_at, { dateStyle: "medium", timeStyle: "short" }) : tr("No programs yet", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨Ø±Ø§Ù…Ø¬ Ø¨Ø¹Ø¯")))}
+              </section>
+              <section class="split-grid">
+                <article class="card">
+                  <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Program builder", "Ù…Ù†Ø´Ø¦ Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬"))}</p><h3 class="card-title">${escapeHtml(tr("Create the next training plan", "Ø£Ù†Ø´Ø¦ Ø®Ø·Ø© Ø§Ù„ØªØ¯Ø±ÙŠØ¨ Ø§Ù„ØªØ§Ù„ÙŠØ©"))}</h3></div></div>
+                  <p class="body-copy">${escapeHtml(tr("Keep the title outcome-based, then use the objective box for the client-facing explanation and the coaching handoff note.", "Ø§Ø¬Ø¹Ù„ Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ù…Ø±ØªØ¨Ø·Ù‹Ø§ Ø¨Ø§Ù„Ù†ØªÙŠØ¬Ø©ØŒ Ø«Ù… Ø§Ø³ØªØ®Ø¯Ù… ØµÙ†Ø¯ÙˆÙ‚ Ø§Ù„Ù‡Ø¯Ù Ù„Ù„Ø´Ø±Ø­ Ø§Ù„Ù…ÙˆØ¬Ù‡ Ù„Ù„Ø¹Ù…ÙŠÙ„ ÙˆÙ…Ù„Ø§Ø­Ø¸Ø© Ø§Ù„ØªØ³Ù„ÙŠÙ… Ø§Ù„ØªØ¯Ø±ÙŠØ¨ÙŠØ©."))}</p>
+                  <form id="program-form" class="stack">
+                    <div class="field-grid">
+                      <div class="field"><label>${escapeHtml(tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"))}</label><select class="select" name="clientUserId" required>${(data.clients || []).map((row) => `<option value="${escapeHtml(row.client_user_id)}">${escapeHtml(clientDisplayName(row))}</option>`).join("")}</select></div>
+                      <div class="field"><label>${escapeHtml(tr("Title", "Ø§Ù„Ø¹Ù†ÙˆØ§Ù†"))}</label><input class="input" type="text" name="title" required /></div>
+                      <div class="field"><label>${escapeHtml(tr("Start date", "ØªØ§Ø±ÙŠØ® Ø§Ù„Ø¨Ø¯Ø§ÙŠØ©"))}</label><input class="input" type="date" name="startDate" /></div>
+                      <div class="field"><label>${escapeHtml(tr("End date", "ØªØ§Ø±ÙŠØ® Ø§Ù„Ù†Ù‡Ø§ÙŠØ©"))}</label><input class="input" type="date" name="endDate" /></div>
+                    </div>
+                    <div class="field"><label>${escapeHtml(tr("Objective", "Ø§Ù„Ù‡Ø¯Ù"))}</label><textarea class="textarea" name="objective"></textarea></div>
+                    <div class="form-actions"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Create program", "Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø¨Ø±Ù†Ø§Ù…Ø¬"))}</button></div>
+                  </form>
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Recent plans", "Ø¢Ø®Ø± Ø§Ù„Ø®Ø·Ø·"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Current program inventory", "Ù…Ø®Ø²ÙˆÙ† Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬ Ø§Ù„Ø­Ø§Ù„ÙŠ"))}</h3>
+                  ${dataTable(
+                    [tr("Title", "Ø§Ù„Ø¹Ù†ÙˆØ§Ù†"), tr("Status", "Ø§Ù„Ø­Ø§Ù„Ø©"), tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"), tr("Updated", "Ø¢Ø®Ø± ØªØ­Ø¯ÙŠØ«"), tr("Action", "Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡")],
+                    (data.plans || []).map((row) => `<tr><td><strong>${escapeHtml(row.title)}</strong><br /><span class="muted">${escapeHtml(row.objective || "")}</span></td><td>${statusPill(row.status)}</td><td>${escapeHtml(clientDisplayName(clientsById.get(row.client_user_id) || row))}</td><td>${escapeHtml(formatDate(row.updated_at, { dateStyle: "medium", timeStyle: "short" }))}</td><td><a class="mini-badge" href="${pathToHash(`/app/trainer/program?plan=${encodeURIComponent(row.id || "")}`)}">${escapeHtml(tr("Open detail", "Ø§ÙØªØ­ Ø§Ù„ØªÙØ§ØµÙŠÙ„"))}</a></td></tr>`),
+                  )}
+                </article>
+              </section>
+            </div>
+          `;
+        }
+
+        function renderTrainerProgramDetail(data) {
+          const rows = data.rows || [];
+          if (!rows.length) return `<div class="empty-state"><strong>${escapeHtml(tr("Choose a program first", "Ø§Ø®ØªØ± Ø¨Ø±Ù†Ø§Ù…Ø¬Ù‹Ø§ Ø£ÙˆÙ„Ù‹Ø§"))}</strong><div>${escapeHtml(tr("Open the programs list to review the full builder detail for a specific plan.", "Ø§ÙØªØ­ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬ Ù„Ù…Ø±Ø§Ø¬Ø¹Ø© ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø¨Ù†Ø§Ø¡ Ù„Ø®Ø·Ø© Ù…Ø­Ø¯Ø¯Ø©."))}</div><div class="form-actions" style="margin-top:18px;"><a class="btn btn-primary" href="${pathToHash("/app/trainer/programs")}">${escapeHtml(tr("Open programs", "Ø§ÙØªØ­ Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬"))}</a></div></div>`;
+          const first = rows[0];
+          const weeks = groupProgramRows(rows);
+          return `
+            <div class="stack">
+              <section class="split-grid">
+                <article class="hero-card">
+                  <p class="card-kicker">${escapeHtml(tr("Program detail", "ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø¨Ø±Ù†Ø§Ù…Ø¬"))}</p>
+                  <h2 class="section-title">${escapeHtml(pick(first, ["plan_title", "title"], tr("Program", "Ø¨Ø±Ù†Ø§Ù…Ø¬")))}</h2>
+                  <p class="lead">${escapeHtml(pick(first, ["plan_objective", "objective", "client_explanation"], tr("No objective summary was provided yet.", "Ù„Ù… ÙŠÙØ¶Ù Ù…Ù„Ø®Øµ Ù„Ù„Ù‡Ø¯Ù Ø¨Ø¹Ø¯.")))}</p>
+                  <div class="tag-row">${statusPill(pick(first, ["plan_status", "status"], "draft"))}<span class="mini-badge">${escapeHtml(planClientName(first))}</span><span class="mini-badge">${escapeHtml(pick(first, ["phase_label", "phase", "objective"], tr("Phase not set", "Ø§Ù„Ù…Ø±Ø­Ù„Ø© ØºÙŠØ± Ù…Ø­Ø¯Ø¯Ø©")))}</span></div>
+                  <div class="hero-cta" style="margin-top:18px;"><a class="btn btn-primary" href="${pathToHash(`/app/trainer/client?client=${encodeURIComponent(pick(first, ["client_user_id"], ""))}`)}">${escapeHtml(tr("Open client cockpit", "Ø§ÙØªØ­ ÙƒÙˆØ¨ÙŠØª Ø§Ù„Ø¹Ù…ÙŠÙ„"))}</a><a class="btn btn-secondary" href="${pathToHash("/app/trainer/programs")}">${escapeHtml(tr("Back to programs", "Ø¹ÙØ¯ Ø¥Ù„Ù‰ Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬"))}</a></div>
+                </article>
+                <section class="kpi-grid">
+                  ${summaryCard(tr("Weeks", "Ø§Ù„Ø£Ø³Ø§Ø¨ÙŠØ¹"), formatNumber(weeks.length))}
+                  ${summaryCard(tr("Sessions", "Ø§Ù„Ø¬Ù„Ø³Ø§Øª"), formatNumber(rows.length))}
+                  ${summaryCard(tr("Start", "Ø§Ù„Ø¨Ø¯Ø§ÙŠØ©"), escapeHtml(formatDate(pick(first, ["start_date"], null))))}
+                  ${summaryCard(tr("End", "Ø§Ù„Ù†Ù‡Ø§ÙŠØ©"), escapeHtml(formatDate(pick(first, ["end_date"], null))))}
+                </section>
+              </section>
+              <section class="card">
+                <div class="toolbar"><div><p class="card-kicker">${escapeHtml(tr("Execution view", "Ù…Ø´Ù‡Ø¯ Ø§Ù„ØªÙ†ÙÙŠØ°"))}</p><h3 class="card-title">${escapeHtml(tr("Weekly structure and coaching notes", "Ø§Ù„Ø¨Ù†ÙŠØ© Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹ÙŠØ© ÙˆÙ…Ù„Ø§Ø­Ø¸Ø§Øª Ø§Ù„ØªØ¯Ø±ÙŠØ¨"))}</h3></div></div>
+                <div class="stack">
+                  ${weeks.map((group) => `<article class="card"><p class="card-kicker">${escapeHtml(tr(`Week ${group.week}`, `Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹ ${group.week}`))}</p>${dataTable([tr("Day", "Ø§Ù„ÙŠÙˆÙ…"), tr("Session", "Ø§Ù„Ø¬Ù„Ø³Ø©"), tr("Prescription", "Ø§Ù„ØªÙƒÙ„ÙŠÙ"), tr("Coach note", "Ù…Ù„Ø§Ø­Ø¸Ø© Ø§Ù„Ù…Ø¯Ø±Ø¨")], group.rows.map((row) => `<tr><td>${escapeHtml(String(pick(row, ["day_number", "day_index"], "-")))}</td><td><strong>${escapeHtml(pick(row, ["session_title", "title"], tr("Session", "Ø¬Ù„Ø³Ø©")))}</strong></td><td>${escapeHtml([pick(row, ["exercise_name"], ""), pick(row, ["sets"], ""), pick(row, ["reps"], ""), pick(row, ["rest_seconds"], "")].filter(Boolean).join(" • ") || pick(row, ["summary", "block_summary"], "-"))}</td><td>${escapeHtml(pick(row, ["coach_note", "notes", "client_explanation"], ""))}</td></tr>`))}</article>`).join("")}
+                </div>
+              </section>
+            </div>
+          `;
+        }
+
+        function renderTrainerCheckins(data) {
+          const checkins = data.checkins || [];
+          const clients = data.clients || [];
+          const fallbackClients = checkins.map((row) => row.client_user_id).filter(Boolean).filter((value, index, rows) => rows.indexOf(value) === index).map((clientId) => ({ client_user_id: clientId }));
+          const clientSource = clients.length ? clients : fallbackClients;
+          return `
+            <div class="stack">
+              <section class="kpi-grid">
+                ${summaryCard(tr("All check-ins", "ÙƒÙ„ Ø§Ù„ØªÙ‚ÙŠÙŠÙ…Ø§Øª"), formatNumber(checkins.length))}
+                ${summaryCard(tr("Drafts", "Ø§Ù„Ù…Ø³ÙˆØ¯Ø§Øª"), formatNumber(checkins.filter((row) => row.status === "draft").length))}
+                ${summaryCard(tr("Submitted", "Ø§Ù„Ù…Ø±Ø³Ù„"), formatNumber(checkins.filter((row) => row.status === "submitted").length))}
+                ${summaryCard(tr("Reviewed", "Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹"), formatNumber(checkins.filter((row) => row.status === "reviewed").length))}
+              </section>
+              <section class="split-grid">
+                <form id="trainer-checkin-form" class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Check-in center", "Ù…Ø±ÙƒØ² Ø§Ù„ØªÙ‚ÙŠÙŠÙ…"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Create a new check-in prompt", "Ø£Ù†Ø´Ø¦ ØªÙ‚ÙŠÙŠÙ…Ù‹Ø§ Ø¬Ø¯ÙŠØ¯Ù‹Ø§"))}</h3>
+                  <p class="body-copy">${escapeHtml(tr("Use named clients here so the weekly follow-up starts from real workspace data instead of raw IDs.", "Ø§Ø³ØªØ®Ø¯Ù… Ø£Ø³Ù…Ø§Ø¡ Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡ Ù‡Ù†Ø§ Ù„ÙŠØ¨Ø¯Ø£ Ø§Ù„ØªØªØ¨Ø¹ Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹ÙŠ Ù…Ù† Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø³Ø§Ø­Ø© Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ© Ø¨Ø¯Ù„Ù‹Ø§ Ù…Ù† Ù…Ø¹Ø±ÙØ§Øª Ø®Ø§Ù…."))}</p>
+                  <div class="field-grid">
+                    <div class="field"><label>${escapeHtml(tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"))}</label><select class="select" name="clientUserId" required>${clientSource.map((row) => `<option value="${escapeHtml(row.client_user_id)}">${escapeHtml(clientDisplayName(row))}</option>`).join("")}</select></div>
+                    <div class="field"><label>${escapeHtml(tr("Check-in date", "ØªØ§Ø±ÙŠØ® Ø§Ù„ØªÙ‚ÙŠÙŠÙ…"))}</label><input class="input" type="date" name="checkinDate" required /></div>
+                    <div class="field"><label>${escapeHtml(tr("Trainer note", "Ù…Ù„Ø§Ø­Ø¸Ø© Ø§Ù„Ù…Ø¯Ø±Ø¨"))}</label><input class="input" type="text" name="notesTrainer" /></div>
+                  </div>
+                  <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Create check-in", "Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„ØªÙ‚ÙŠÙŠÙ…"))}</button></div>
+                </form>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Live check-ins", "Ø§Ù„ØªÙ‚ÙŠÙŠÙ…Ø§Øª Ø§Ù„Ø­Ø§Ù„ÙŠØ©"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Due, submitted, reviewed", "Ø§Ù„Ù…Ø³ØªØ­Ù‚ ÙˆØ§Ù„Ù…Ø±Ø³Ù„ ÙˆØ§Ù„Ù…Ø±Ø§Ø¬Ø¹"))}</h3>
+                  ${dataTable(
+                    [tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"), tr("Date", "Ø§Ù„ØªØ§Ø±ÙŠØ®"), tr("Status", "Ø§Ù„Ø­Ø§Ù„Ø©"), tr("Client note", "Ù…Ù„Ø§Ø­Ø¸Ø© Ø§Ù„Ø¹Ù…ÙŠÙ„"), tr("Action", "Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡")],
+                    checkins.map((row) => `<tr><td>${escapeHtml(clientDisplayName(clients.find((client) => client.client_user_id === row.client_user_id) || row))}</td><td>${escapeHtml(formatDate(row.checkin_date))}</td><td>${statusPill(row.status)}</td><td>${escapeHtml(row.notes_client || "")}</td><td><a class="mini-badge" href="${pathToHash(`/app/trainer/client?client=${encodeURIComponent(row.client_user_id || "")}`)}">${escapeHtml(tr("Open cockpit", "Ø§ÙØªØ­ Ø§Ù„ÙƒÙˆØ¨ÙŠØª"))}</a></td></tr>`),
+                  )}
+                </article>
+              </section>
+            </div>
+          `;
+        }
+
+        function renderCalendar(data) {
+          const clients = data.clients || [];
+          return `
+              <div class="stack">
+                ${currentRole() === "trainer" ? `<form id="workout-session-form" class="card"><p class="card-kicker">${escapeHtml(tr("Schedule", "Ø§Ù„Ø¬Ø¯ÙˆÙ„Ø©"))}</p><h3 class="card-title">${escapeHtml(tr("Create a workout session", "Ø£Ù†Ø´Ø¦ Ø¬Ù„Ø³Ø© ØªÙ…Ø±ÙŠÙ†"))}</h3><div class="field-grid"><div class="field"><label>${escapeHtml(tr("Client", "Ø§Ù„Ø¹Ù…ÙŠÙ„"))}</label><select class="select" name="clientUserId" required>${clients.map((row) => `<option value="${escapeHtml(row.client_user_id)}">${escapeHtml(clientDisplayName(row))}</option>`).join("")}</select></div><div class="field"><label>${escapeHtml(tr("Start time", "ÙˆÙ‚Øª Ø§Ù„Ø¨Ø¯Ø§ÙŠØ©"))}</label><input class="input" type="datetime-local" name="scheduledFor" required /></div></div><div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Notes", "Ù…Ù„Ø§Ø­Ø¸Ø§Øª"))}</label><input class="input" type="text" name="notes" /></div><div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Schedule session", "Ø¬Ø¯ÙˆÙ„Ø© Ø§Ù„Ø¬Ù„Ø³Ø©"))}</button></div></form>` : ""}
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Upcoming", "Ø§Ù„Ù‚Ø§Ø¯Ù…"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Agenda timeline", "Ø§Ù„Ø®Ø· Ø§Ù„Ø²Ù…Ù†ÙŠ Ù„Ù„Ø£Ø¬Ù†Ø¯Ø©"))}</h3>
+                  <div class="timeline">
+                    ${(data.sessions || []).length ? data.sessions.map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(formatDate(row.scheduled_for, { dateStyle: "medium", timeStyle: "short" }))}</strong>${statusPill(row.status)}</div><p class="timeline-copy">${escapeHtml(row.title || row.notes || tr("Workout session", "Ø¬Ù„Ø³Ø© ØªÙ…Ø±ÙŠÙ†"))}</p><div class="meta">${escapeHtml(planClientName(row))}</div>${row.notes && row.notes !== row.title ? `<p class="muted">${escapeHtml(row.notes)}</p>` : ""}</article>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No agenda items scheduled", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¹Ù†Ø§ØµØ± Ù…Ø¬Ø¯ÙˆÙ„Ø© ÙÙŠ Ø§Ù„Ø£Ø¬Ù†Ø¯Ø©"))}</strong></div>`}
+                  </div>
+                </article>
+              </div>
+            `;
+        }
+
+        function renderClientHome(data) {
+          const today = data.today || {};
+          return `
+            <div class="stack">
+              <section class="split-grid">
+                <article class="hero-card">
+                  <p class="card-kicker">${escapeHtml(tr("Today's next step", "Ø®Ø·ÙˆØ© Ø§Ù„ÙŠÙˆÙ… Ø§Ù„ØªØ§Ù„ÙŠØ©"))}</p>
+                  <h2 class="section-title">${escapeHtml(pick(today, ["next_action_title", "plan_title"], tr("Open your plan and keep the streak moving", "Ø§ÙØªØ­ Ø®Ø·ØªÙƒ ÙˆØ§Ø³ØªÙ…Ø± ÙÙŠ Ø§Ù„Ø³Ù„Ø³Ù„Ø©")))}</h2>
+                  <p class="lead">${escapeHtml(pick(today, ["next_action_body", "coach_prompt", "summary"], tr("Your coach flow should be obvious here: plan, check-in, messages, and reminders in one place.", "ÙŠØ¬Ø¨ Ø£Ù† ØªÙƒÙˆÙ† Ø§Ù„Ø®Ø·ÙˆØ© ÙˆØ§Ø¶Ø­Ø© Ù‡Ù†Ø§: Ø§Ù„Ø®Ø·Ø© ÙˆØ§Ù„ØªÙ‚ÙŠÙŠÙ… ÙˆØ§Ù„Ø±Ø³Ø§Ø¦Ù„ ÙˆØ§Ù„ØªÙ†Ø¨ÙŠÙ‡Ø§Øª ÙÙŠ Ù…ÙƒØ§Ù† ÙˆØ§Ø­Ø¯.")))}</p>
+                  <div class="hero-cta" style="margin-top:18px;"><a class="btn btn-primary" href="${pathToHash("/app/client/plan")}">${escapeHtml(tr("Open my plan", "Ø§ÙØªØ­ Ø®Ø·ØªÙŠ"))}</a><a class="btn btn-secondary" href="${pathToHash("/app/client/checkins")}">${escapeHtml(tr("Submit check-in", "Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„ØªÙ‚ÙŠÙŠÙ…"))}</a></div>
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Snapshot", "Ù…Ù„Ø®Øµ"))}</p>
+                  <div class="metric-grid">
+                    <div class="metric"><p class="metric-value">${escapeHtml(formatNumber(pick(today, ["streak_days", "streak"], 0)))}</p><p class="metric-label">${escapeHtml(tr("Streak", "Ø§Ù„Ø³Ù„Ø³Ù„Ø©"))}</p></div>
+                    <div class="metric"><p class="metric-value">${escapeHtml(formatDate(pick(today, ["next_checkin_date", "checkin_date"], null)))}</p><p class="metric-label">${escapeHtml(tr("Next check-in", "Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ù‚Ø§Ø¯Ù…"))}</p></div>
+                    <div class="metric"><p class="metric-value">${escapeHtml(String(pick(today, ["plan_completion_rate", "completion_rate", "adherence_score"], "-")))}</p><p class="metric-label">${escapeHtml(tr("Completion", "Ø§Ù„Ø¥Ù†Ø¬Ø§Ø²"))}</p></div>
+                    <div class="metric"><p class="metric-value">${escapeHtml(pick(today, ["coach_name", "trainer_name"], tr("Your coach", "Ù…Ø¯Ø±Ø¨Ùƒ")))}</p><p class="metric-label">${escapeHtml(tr("Coach", "Ø§Ù„Ù…Ø¯Ø±Ø¨"))}</p></div>
+                  </div>
+                </article>
+              </section>
+              <section class="split-grid">
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("This week", "Ù‡Ø°Ø§ Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Keep the momentum simple", "Ø­Ø§ÙØ¸ Ø¹Ù„Ù‰ Ø§Ù„Ø²Ø®Ù… Ø¨Ø¨Ø³Ø§Ø·Ø©"))}</h3>
+                  <ul class="clean-list">
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(pick(today, ["coach_prompt", "summary"], tr("Open the plan, finish the next workout, then close the week with a check-in.", "Ø§ÙØªØ­ Ø§Ù„Ø®Ø·Ø©ØŒ Ø£Ù†Ù‡Ù Ø§Ù„ØªÙ…Ø±ÙŠÙ† Ø§Ù„ØªØ§Ù„ÙŠØŒ Ø«Ù… Ø£ØºÙ„Ù‚ Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹ Ø¨ØªÙ‚ÙŠÙŠÙ….")))}</div></li>
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("If your schedule slipped, send a short message instead of disappearing from the flow.", "Ø¥Ø°Ø§ ØªØ¹Ø·Ù„ Ø¬Ø¯ÙˆÙ„ÙƒØŒ Ø£Ø±Ø³Ù„ Ø±Ø³Ø§Ù„Ø© Ù‚ØµÙŠØ±Ø© Ø¨Ø¯Ù„Ù‹Ø§ Ù…Ù† Ø§Ù„Ø§Ø®ØªÙØ§Ø¡ Ù…Ù† Ø§Ù„Ù…Ø³Ø§Ø±."))}</div></li>
+                    <li class="list-item"><span class="dot"></span><div>${escapeHtml(tr("Use progress logging for one useful body marker, not every possible metric.", "Ø§Ø³ØªØ®Ø¯Ù… ØªØ³Ø¬ÙŠÙ„ Ø§Ù„ØªÙ‚Ø¯Ù… Ù„Ù…Ø¤Ø´Ø± Ø¬Ø³Ø¯ÙŠ Ù…ÙÙŠØ¯ ÙˆØ§Ø­Ø¯ØŒ Ù„Ø§ Ù„ÙƒÙ„ Ø§Ù„Ù…Ù‚Ø§ÙŠÙŠØ³ Ø§Ù„Ù…Ù…ÙƒÙ†Ø©."))}</div></li>
+                  </ul>
+                </article>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Next actions", "Ø§Ù„Ø®Ø·ÙˆØ§Øª Ø§Ù„ØªØ§Ù„ÙŠØ©"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Choose one clear move", "Ø§Ø®ØªØ± Ø®Ø·ÙˆØ© ÙˆØ§Ø¶Ø­Ø© ÙˆØ§Ø­Ø¯Ø©"))}</h3>
+                  <div class="tag-row"><a class="mini-badge" href="${pathToHash("/app/client/plan")}">${escapeHtml(tr("Open plan", "Ø§ÙØªØ­ Ø§Ù„Ø®Ø·Ø©"))}</a><a class="mini-badge" href="${pathToHash("/app/client/checkins")}">${escapeHtml(tr("Check in", "Ø£Ø±Ø³Ù„ ØªÙ‚ÙŠÙŠÙ…Ù‹Ø§"))}</a><a class="mini-badge" href="${pathToHash("/app/client/progress")}">${escapeHtml(tr("Log progress", "Ø³Ø¬Ù„ ØªÙ‚Ø¯Ù…Ù‹Ø§"))}</a><a class="mini-badge" href="${pathToHash("/app/client/messages")}">${escapeHtml(tr("Message coach", "Ø±Ø§Ø³Ù„ Ø§Ù„Ù…Ø¯Ø±Ø¨"))}</a></div>
+                </article>
+              </section>
+              <section class="card">
+                <p class="card-kicker">${escapeHtml(tr("Recent notices", "Ø¢Ø®Ø± Ø§Ù„ØªÙ†Ø¨ÙŠÙ‡Ø§Øª"))}</p>
+                <h3 class="card-title">${escapeHtml(tr("Stay aligned with the plan", "Ø§Ø¨Ù‚ÙŽ Ù…Ù†Ø³Ø¬Ù…Ù‹Ø§ Ù…Ø¹ Ø§Ù„Ø®Ø·Ø©"))}</h3>
+                <div class="stack">
+                  ${(data.notices || []).length ? data.notices.map((row) => `<article class="timeline-item"><div class="timeline-head"><strong>${escapeHtml(row.title)}</strong><span class="mini-badge">${escapeHtml(statusLabel(row.type))}</span></div><p class="timeline-copy">${escapeHtml(row.body)}</p></article>`).join("") : `<div class="empty-state"><strong>${escapeHtml(tr("No notices right now", "Ù„Ø§ ØªÙˆØ¬Ø¯ ØªÙ†Ø¨ÙŠÙ‡Ø§Øª Ø§Ù„Ø¢Ù†"))}</strong></div>`}
+                </div>
+              </section>
+            </div>
+          `;
+        }
+
+        function renderClientCheckins(data) {
+          const latest = (data.checkins || [])[0] || null;
+          return `
+            <div class="stack">
+              <section class="kpi-grid">
+                ${summaryCard(tr("Latest weight", "Ø¢Ø®Ø± ÙˆØ²Ù†"), escapeHtml(latest?.weight_kg != null ? String(latest.weight_kg) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Latest sleep", "Ø¢Ø®Ø± Ù†ÙˆÙ…"), escapeHtml(latest?.sleep_hours != null ? String(latest.sleep_hours) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Latest energy", "Ø¢Ø®Ø± Ø·Ø§Ù‚Ø©"), escapeHtml(latest?.energy_score != null ? String(latest.energy_score) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Latest adherence", "Ø¢Ø®Ø± Ø§Ù„ØªØ²Ø§Ù…"), escapeHtml(latest?.adherence_score != null ? String(latest.adherence_score) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+              </section>
+              <section class="split-grid">
+                <form id="client-checkin-form" class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Weekly check-in", "Ø§Ù„ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹ÙŠ"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Submit your current snapshot", "Ø£Ø±Ø³Ù„ Ø­Ø§Ù„ØªÙƒ Ø§Ù„Ø­Ø§Ù„ÙŠØ©"))}</h3>
+                  <p class="body-copy">${escapeHtml(tr("Keep this practical: body signal, recovery signal, and one short note about what felt easy or hard this week.", "Ø§Ø¬Ø¹Ù„ Ù‡Ø°Ø§ Ø¹Ù…Ù„ÙŠÙ‹Ø§: Ø¥Ø´Ø§Ø±Ø© Ø¬Ø³Ø¯ÙŠØ©ØŒ ÙˆØ¥Ø´Ø§Ø±Ø© ØªØ¹Ø§ÙÙØŒ ÙˆÙ…Ù„Ø§Ø­Ø¸Ø© Ù‚ØµÙŠØ±Ø© Ø¹Ù…Ø§ ÙƒØ§Ù† Ø³Ù‡Ù„Ù‹Ø§ Ø£Ùˆ ØµØ¹Ø¨Ù‹Ø§ Ù‡Ø°Ø§ Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹."))}</p>
+                  <div class="field-grid">
+                    <div class="field"><label>${escapeHtml(tr("Date", "Ø§Ù„ØªØ§Ø±ÙŠØ®"))}</label><input class="input" type="date" name="checkinDate" required /></div>
+                    <div class="field"><label>${escapeHtml(tr("Weight (kg)", "Ø§Ù„ÙˆØ²Ù†"))}</label><input class="input" type="number" step="0.1" name="weightKg" /></div>
+                    <div class="field"><label>${escapeHtml(tr("Sleep hours", "Ø³Ø§Ø¹Ø§Øª Ø§Ù„Ù†ÙˆÙ…"))}</label><input class="input" type="number" step="0.1" name="sleepHours" /></div>
+                    <div class="field"><label>${escapeHtml(tr("Stress score", "Ù…Ø³ØªÙˆÙ‰ Ø§Ù„ØªÙˆØªØ±"))}</label><input class="input" type="number" min="1" max="10" name="stressScore" /></div>
+                    <div class="field"><label>${escapeHtml(tr("Energy score", "Ù…Ø³ØªÙˆÙ‰ Ø§Ù„Ø·Ø§Ù‚Ø©"))}</label><input class="input" type="number" min="1" max="10" name="energyScore" /></div>
+                    <div class="field"><label>${escapeHtml(tr("Adherence score", "Ø§Ù„Ø§Ù„ØªØ²Ø§Ù…"))}</label><input class="input" type="number" min="1" max="10" name="adherenceScore" /></div>
+                  </div>
+                  <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Notes", "Ù…Ù„Ø§Ø­Ø¸Ø§Øª"))}</label><textarea class="textarea" name="notesClient" placeholder="${escapeHtml(tr("Biggest win, biggest struggle, and what support you need next.", "Ø£ÙƒØ¨Ø± Ù…ÙƒØ³Ø¨ØŒ ÙˆØ£ÙƒØ¨Ø± ØµØ¹ÙˆØ¨Ø©ØŒ ÙˆÙ†ÙˆØ¹ Ø§Ù„Ø¯Ø¹Ù… Ø§Ù„Ø°ÙŠ ØªØ­ØªØ§Ø¬Ù‡ Ø¨Ø¹Ø¯ Ø°Ù„Ùƒ."))}"></textarea></div>
+                  <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Submit check-in", "Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„ØªÙ‚ÙŠÙŠÙ…"))}</button></div>
+                </form>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("History", "Ø§Ù„Ø³Ø¬Ù„"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Your recent check-ins", "Ø¢Ø®Ø± ØªÙ‚ÙŠÙŠÙ…Ø§ØªÙƒ"))}</h3>
+                  ${dataTable(
+                    [tr("Date", "Ø§Ù„ØªØ§Ø±ÙŠØ®"), tr("Status", "Ø§Ù„Ø­Ø§Ù„Ø©"), tr("Weight", "Ø§Ù„ÙˆØ²Ù†"), tr("Recovery", "Ø§Ù„ØªØ¹Ø§ÙÙŠ"), tr("Notes", "Ù…Ù„Ø§Ø­Ø¸Ø§Øª")],
+                    (data.checkins || []).map((row) => `<tr><td>${escapeHtml(formatDate(row.checkin_date))}</td><td>${statusPill(row.status)}</td><td>${escapeHtml(row.weight_kg ?? "-")}</td><td>${escapeHtml(`${row.sleep_hours ?? "-"}h / ${row.energy_score ?? "-"}`)}</td><td>${escapeHtml(row.notes_client || "")}</td></tr>`),
+                  )}
+                </article>
+              </section>
+            </div>
+          `;
+        }
+
+        function renderClientProgress(data) {
+          const latestWeight = latestMetric(data.progress || [], "weight");
+          const latestWaist = latestMetric(data.progress || [], "waist");
+          return `
+            <div class="stack">
+              <section class="kpi-grid">
+                ${summaryCard(tr("Latest weight", "Ø¢Ø®Ø± ÙˆØ²Ù†"), escapeHtml(latestWeight ? metricValueLabel(latestWeight) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Latest waist", "Ø¢Ø®Ø± Ù…Ø­ÙŠØ· Ø®ØµØ±"), escapeHtml(latestWaist ? metricValueLabel(latestWaist) : tr("No entry", "Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¨ÙŠØ§Ù†Ø§Øª")))}
+                ${summaryCard(tr("Entries", "Ø§Ù„Ø¥Ø¯Ø®Ø§Ù„Ø§Øª"), formatNumber((data.progress || []).length))}
+                ${summaryCard(tr("Best practice", "Ø£ÙØ¶Ù„ Ù…Ù…Ø§Ø±Ø³Ø©"), escapeHtml(tr("Track one or two useful metrics consistently.", "ØªØ§Ø¨Ø¹ Ù…Ø¤Ø´Ø±Ù‹Ø§ Ø£Ùˆ Ø§Ø«Ù†ÙŠÙ† Ù…ÙÙŠØ¯ÙŠÙ† Ø¨Ø´ÙƒÙ„ Ù…Ø³ØªÙ…Ø±.")))}
+              </section>
+              <section class="split-grid">
+                <form id="progress-form" class="card">
+                  <p class="card-kicker">${escapeHtml(tr("Progress entry", "Ø¥Ø¯Ø®Ø§Ù„ ØªÙ‚Ø¯Ù…"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Log a metric", "Ø³Ø¬Ù„ Ù‚ÙŠØ§Ø³Ù‹Ø§"))}</h3>
+                  <div class="field-grid">
+                    <div class="field"><label>${escapeHtml(tr("Metric key", "Ø§Ø³Ù… Ø§Ù„Ù‚ÙŠØ§Ø³"))}</label><select class="select" name="metricKey"><option value="weight">${escapeHtml(tr("Body weight", "ÙˆØ²Ù† Ø§Ù„Ø¬Ø³Ù…"))}</option><option value="waist">${escapeHtml(tr("Waist", "Ù…Ø­ÙŠØ· Ø§Ù„Ø®ØµØ±"))}</option><option value="hips">${escapeHtml(tr("Hips", "Ù…Ø­ÙŠØ· Ø§Ù„ÙˆØ±Ùƒ"))}</option><option value="chest">${escapeHtml(tr("Chest", "Ù…Ø­ÙŠØ· Ø§Ù„ØµØ¯Ø±"))}</option><option value="arm">${escapeHtml(tr("Arm", "Ù…Ø­ÙŠØ· Ø§Ù„Ø°Ø±Ø§Ø¹"))}</option><option value="thigh">${escapeHtml(tr("Thigh", "Ù…Ø­ÙŠØ· Ø§Ù„ÙØ®Ø°"))}</option><option value="body_fat">${escapeHtml(tr("Body fat", "Ù†Ø³Ø¨Ø© Ø§Ù„Ø¯Ù‡ÙˆÙ†"))}</option></select></div>
+                    <div class="field"><label>${escapeHtml(tr("Value", "Ø§Ù„Ù‚ÙŠÙ…Ø©"))}</label><input class="input" type="number" step="0.1" name="metricValue" required /></div>
+                    <div class="field"><label>${escapeHtml(tr("Unit", "Ø§Ù„ÙˆØ­Ø¯Ø©"))}</label><input class="input" type="text" name="metricUnit" value="kg" /></div>
+                    <div class="field"><label>${escapeHtml(tr("Date", "Ø§Ù„ØªØ§Ø±ÙŠØ®"))}</label><input class="input" type="date" name="measuredOn" required /></div>
+                  </div>
+                  <div class="field" style="margin-top:16px;"><label>${escapeHtml(tr("Notes", "Ù…Ù„Ø§Ø­Ø¸Ø§Øª"))}</label><textarea class="textarea" name="notes"></textarea></div>
+                  <div class="form-actions" style="margin-top:18px;"><button class="btn btn-primary" type="submit">${escapeHtml(tr("Save progress", "Ø­ÙØ¸ Ø§Ù„ØªÙ‚Ø¯Ù…"))}</button></div>
+                </form>
+                <article class="card">
+                  <p class="card-kicker">${escapeHtml(tr("History", "Ø§Ù„Ø³Ø¬Ù„"))}</p>
+                  <h3 class="card-title">${escapeHtml(tr("Progress timeline", "Ø§Ù„Ø®Ø· Ø§Ù„Ø²Ù…Ù†ÙŠ Ù„Ù„ØªÙ‚Ø¯Ù…"))}</h3>
+                  ${dataTable(
+                    [tr("Date", "Ø§Ù„ØªØ§Ø±ÙŠØ®"), tr("Metric", "Ø§Ù„Ù‚ÙŠØ§Ø³"), tr("Value", "Ø§Ù„Ù‚ÙŠÙ…Ø©"), tr("Notes", "Ù…Ù„Ø§Ø­Ø¸Ø§Øª")],
+                    (data.progress || []).map((row) => `<tr><td>${escapeHtml(formatDate(pick(row, ["recorded_at", "measured_on"], null)))}</td><td>${escapeHtml(pick(row, ["metric_type", "metric_key"], "-"))}</td><td>${escapeHtml(metricValueLabel(row))}</td><td>${escapeHtml(row.notes || "")}</td></tr>`),
+                  )}
+                </article>
+              </section>
+            </div>
+          `;
+        }
+
+        function legacyRenderAppContent() {
+          if (!canAccessRoute(state.route.path)) return renderPermissionDenied();
+          const view = getView();
+          if (state.route.path === "/app/trainer/dashboard") return renderViewState(view, renderTrainerDashboard);
+          if (state.route.path === "/app/trainer/clients") return renderViewState(view, renderTrainerClients);
+          if (state.route.path === "/app/trainer/client") return renderViewState(view, renderTrainerClientDetail);
+          if (state.route.path === "/app/trainer/programs") return renderViewState(view, renderTrainerPrograms);
+          if (state.route.path === "/app/trainer/program") return renderViewState(view, renderTrainerProgramDetail);
+          if (state.route.path === "/app/trainer/checkins") return renderViewState(view, renderTrainerCheckins);
+          if (state.route.path === "/app/trainer/messages" || state.route.path === "/app/client/messages") return renderViewState(view, renderMessages);
+          if (state.route.path === "/app/trainer/calendar" || state.route.path === "/app/client/calendar") return renderViewState(view, renderCalendar);
+          if (state.route.path === "/app/trainer/files" || state.route.path === "/app/client/files") return renderViewState(view, renderFiles);
+          if (state.route.path === "/app/trainer/analytics") return renderViewState(view, renderAnalytics);
+          if (state.route.path === "/app/trainer/billing") return renderViewState(view, renderTrainerBilling);
+          if (state.route.path === "/app/trainer/settings") return renderViewState(view, renderSettings);
+          if (state.route.path === "/app/client/home") return renderViewState(view, renderClientHome);
+          if (state.route.path === "/app/client/plan") return renderViewState(view, renderClientPlan);
+          if (state.route.path === "/app/client/checkins") return renderViewState(view, renderClientCheckins);
+          if (state.route.path === "/app/client/progress") return renderViewState(view, renderClientProgress);
+          if (state.route.path === "/app/client/account") return renderViewState(view, renderClientAccount);
+          if (state.route.path === "/app/admin/overview") return renderViewState(view, renderAdminOverview);
+          if (state.route.path === "/app/admin/access") return renderViewState(view, renderAdminAccess);
+          if (state.route.path === "/app/admin/users") return renderViewState(view, renderAdminUsers);
+          if (state.route.path === "/app/admin/support") return renderViewState(view, renderAdminSupport);
+          if (state.route.path === "/app/admin/audit") return renderViewState(view, renderAdminAudit);
+          if (state.route.path === "/app/admin/settings") return renderViewState(view, renderAdminSettings);
+          return renderPermissionDenied();
         }
 
         function renderAdminOverview(data) {
@@ -2359,7 +3847,9 @@
           const view = getView();
           if (state.route.path === "/app/trainer/dashboard") return renderViewState(view, renderTrainerDashboard);
           if (state.route.path === "/app/trainer/clients") return renderViewState(view, renderTrainerClients);
+          if (state.route.path === "/app/trainer/client") return renderViewState(view, renderTrainerClientDetail);
           if (state.route.path === "/app/trainer/programs") return renderViewState(view, renderTrainerPrograms);
+          if (state.route.path === "/app/trainer/program") return renderViewState(view, renderTrainerProgramDetail);
           if (state.route.path === "/app/trainer/checkins") return renderViewState(view, renderTrainerCheckins);
           if (state.route.path === "/app/trainer/messages" || state.route.path === "/app/client/messages") return renderViewState(view, renderMessages);
           if (state.route.path === "/app/trainer/calendar" || state.route.path === "/app/client/calendar") return renderViewState(view, renderCalendar);
@@ -2508,7 +3998,7 @@
 
           if (form.id === "lead-form") {
             await runTask(tr("Sending request", "إرسال الطلب"), async () => {
-              const email = String(formData.get("email") || "").trim().toLowerCase();
+              const email = normalizeEmail(formData.get("email"));
               if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
               await invokeFunction("capture-lead", {
                 name: String(formData.get("name") || "").trim(),
@@ -2526,12 +4016,12 @@
 
           if (form.id === "login-password-form") {
             await runTask(tr("Signing in", "تسجيل الدخول"), async () => {
-              const email = String(formData.get("email") || "").trim().toLowerCase();
+              const email = normalizeEmail(formData.get("email"));
               const password = String(formData.get("password") || "");
               if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
               if (!validatePassword(password)) throw new Error(tr("Password must be at least 8 characters", "يجب أن تكون كلمة المرور 8 أحرف على الأقل"));
-              const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
-              if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
+              const inviteToken = state.route.query.get("token") || currentInviteToken();
+              if (inviteToken) saveInviteToken(inviteToken, email);
               await signInWithPassword(email, password);
               await refreshCurrentRoute(true);
               window.location.hash = inviteToken ? pathToHash(`/invite?token=${encodeURIComponent(inviteToken)}`) : pathToHash(defaultAppRoute());
@@ -2541,11 +4031,11 @@
 
           if (form.id === "login-magic-form") {
             await runTask(tr("Sending magic link", "إرسال الرابط"), async () => {
-              const email = String(formData.get("email") || "").trim().toLowerCase();
+              const email = normalizeEmail(formData.get("email"));
               if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
               rememberPendingEmail(email);
-              const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
-              if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
+              const inviteToken = state.route.query.get("token") || currentInviteToken();
+              if (inviteToken) saveInviteToken(inviteToken, email);
               await signInWithMagicLink(email);
               toast(tr("Magic link sent. Check your inbox.", "تم إرسال الرابط. تحقق من بريدك."), "success");
             });
@@ -2555,17 +4045,18 @@
           if (form.id === "signup-form" && !form.dataset.otpModeHandled) {
             form.dataset.otpModeHandled = "1";
             try {
-              await runTask(tr("Creating account", "Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨"), async () => {
-                const email = String(formData.get("email") || "").trim().toLowerCase();
+              await runTask(tr("Creating account", "إنشاء الحساب"), async () => {
+                const email = normalizeEmail(formData.get("email"));
                 const accountType = String(formData.get("accountType") || "client");
                 const language = String(formData.get("language") || state.language);
-                const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
-                if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "Ø£Ø¯Ø®Ù„ Ø¨Ø±ÙŠØ¯Ù‹Ø§ ØµØ­ÙŠØ­Ù‹Ø§"));
+                const inviteToken = state.route.query.get("token") || currentInviteToken();
+                if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
                 rememberPendingEmail(email);
-                if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
+                if (inviteToken) saveInviteToken(inviteToken, email);
                 if (accountType === "trainer") {
-                  writeJson(STORAGE_KEYS.bootstrap, {
+                  writePendingBootstrap({
                     kind: "trainer",
+                    email,
                     payload: {
                       workspaceName: String(formData.get("workspaceName") || "").trim(),
                       brandName: String(formData.get("brandName") || "").trim(),
@@ -2578,8 +4069,9 @@
                     },
                   });
                 } else if (!inviteToken) {
-                  writeJson(STORAGE_KEYS.bootstrap, {
+                  writePendingBootstrap({
                     kind: "client",
+                    email,
                     payload: {
                       goal: String(formData.get("goal") || "").trim(),
                       constraints: String(formData.get("constraints") || "").trim(),
@@ -2596,7 +4088,7 @@
                   accountType,
                   language,
                 });
-                toast(tr("Check your email for the secure sign-in link. That link will complete account creation and bring you back here.", "ØªØ­Ù‚Ù‚ Ù…Ù† Ø¨Ø±ÙŠØ¯Ùƒ Ù„Ø±Ø§Ø¨Ø· Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø§Ù„Ø¢Ù…Ù†. Ù‡Ø°Ø§ Ø§Ù„Ø±Ø§Ø¨Ø· Ø³ÙŠÙƒÙ…Ù„ Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨ ÙˆÙŠØ¹ÙŠØ¯Ùƒ Ø¥Ù„Ù‰ Ù‡Ù†Ø§."), "success");
+                toast(tr("Check your email for the secure sign-in link. That link will complete account creation and bring you back here.", "تحقق من بريدك لرابط الدخول الآمن. هذا الرابط سيكمل إنشاء الحساب ويعيدك إلى هنا."), "success");
                 window.location.hash = pathToHash("/verify");
               });
             } finally {
@@ -2605,65 +4097,14 @@
             return;
           }
 
-          if (form.id === "signup-form") {
-            await runTask(tr("Creating account", "إنشاء الحساب"), async () => {
-              const email = String(formData.get("email") || "").trim().toLowerCase();
-              const password = String(formData.get("password") || "");
-              const accountType = String(formData.get("accountType") || "client");
-              const language = String(formData.get("language") || state.language);
-              const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
-              if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
-              if (!validatePassword(password)) throw new Error(tr("Password must be at least 8 characters", "يجب أن تكون كلمة المرور 8 أحرف على الأقل"));
-              rememberPendingEmail(email);
-              if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
-              if (accountType === "trainer") {
-                writeJson(STORAGE_KEYS.bootstrap, {
-                  kind: "trainer",
-                  payload: {
-                    workspaceName: String(formData.get("workspaceName") || "").trim(),
-                    brandName: String(formData.get("brandName") || "").trim(),
-                    workspaceShape: String(formData.get("workspaceShape") || "trainer"),
-                    packageInterest: String(formData.get("packageInterest") || "solo_coach"),
-                    coachingType: String(formData.get("coachingType") || "").trim(),
-                    audience: String(formData.get("audience") || "").trim(),
-                    language,
-                    timezone: String(formData.get("timezone") || "UTC").trim(),
-                  },
-                });
-              } else if (!inviteToken) {
-                writeJson(STORAGE_KEYS.bootstrap, {
-                  kind: "client",
-                  payload: {
-                    goal: String(formData.get("goal") || "").trim(),
-                    constraints: String(formData.get("constraints") || "").trim(),
-                    language,
-                    timezone: String(formData.get("timezone") || "UTC").trim(),
-                  },
-                });
-              } else {
-                removeStorage(STORAGE_KEYS.bootstrap);
-              }
-              const result = await signUpWithPassword({
-                fullName: String(formData.get("fullName") || "").trim(),
-                email,
-                password,
-                accountType,
-                language,
-              });
-              if (result?.access_token) saveSession(result);
-              toast(tr("Account created. Check your email for the confirmation link. If the email contains a code instead, enter it on the next screen.", "تم إنشاء الحساب. تحقق من بريدك لرابط التأكيد. وإذا احتوى البريد على رمز بدلًا من ذلك فأدخله في الشاشة التالية."), "success");
-              window.location.hash = pathToHash("/verify");
-            });
-            return;
-          }
-
           if (form.id === "verify-form") {
             await runTask(tr("Verifying email", "التحقق من البريد"), async () => {
-              const email = String(formData.get("email") || "").trim().toLowerCase();
+              const email = normalizeEmail(formData.get("email"));
               rememberPendingEmail(email);
+              const inviteToken = currentInviteToken();
+              if (inviteToken) saveInviteToken(inviteToken, email);
               await verifyEmailOtp(email, String(formData.get("token") || "").trim());
               await refreshCurrentRoute(true);
-              const inviteToken = readString(STORAGE_KEYS.invite, "");
               window.location.hash = inviteToken ? pathToHash(`/invite?token=${encodeURIComponent(inviteToken)}`) : pathToHash(defaultAppRoute());
             });
             return;
@@ -2671,9 +4112,11 @@
 
           if (form.id === "verify-magic-form") {
             await runTask(tr("Sending magic link", "إرسال الرابط"), async () => {
-              const email = String(formData.get("email") || "").trim().toLowerCase();
+              const email = normalizeEmail(formData.get("email"));
               if (!validateEmail(email)) throw new Error(tr("Enter a valid email", "أدخل بريدًا صحيحًا"));
               rememberPendingEmail(email);
+              const inviteToken = currentInviteToken();
+              if (inviteToken) saveInviteToken(inviteToken, email);
               await signInWithMagicLink(email);
               toast(tr("Magic link sent. Check your inbox and spam folder.", "تم إرسال رابط الدخول. تحقق من الوارد والبريد المزعج."), "success");
             });
@@ -2705,7 +4148,7 @@
                 token: String(formData.get("token") || "").trim(),
                 goal: String(formData.get("goal") || "").trim(),
               });
-              removeStorage(STORAGE_KEYS.invite);
+              clearInviteToken();
               await refreshCurrentRoute(true);
               toast(tr("Invite accepted.", "تم قبول الدعوة."), "success");
               window.location.hash = pathToHash(result.inviteType === "staff" ? "/app/trainer/dashboard" : defaultAppRoute());
@@ -2715,9 +4158,10 @@
 
           if (form.id === "trainer-invite-form") {
             await runTask(tr("Issuing invite", "إصدار الدعوة"), async () => {
+              requireWriteAccess();
               const result = await invokeFunction("issue-invite", {
                 organizationId: currentOrgId(),
-                email: String(formData.get("email") || "").trim().toLowerCase(),
+                email: normalizeEmail(formData.get("email")),
                 inviteType: String(formData.get("inviteType") || "client"),
                 note: String(formData.get("note") || "").trim(),
                 trainerUserId: state.user.id,
@@ -3010,8 +4454,8 @@
             return;
           }
           if (action === "start-google") {
-            const inviteToken = state.route.query.get("token") || readString(STORAGE_KEYS.invite, "");
-            if (inviteToken) writeString(STORAGE_KEYS.invite, inviteToken);
+            const inviteToken = state.route.query.get("token") || currentInviteToken();
+            if (inviteToken) saveInviteToken(inviteToken);
             startGoogleAuth();
             return;
           }
