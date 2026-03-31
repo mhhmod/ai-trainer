@@ -1487,119 +1487,7 @@
           state.realtime.topic = topic;
         }
 
-        async function loadRouteData() {
-          const route = state.route.path;
-          if (!route.startsWith("/app/") || !state.session || !canAccessRoute(route)) return;
-          state.views[route] = { status: "loading", data: state.views[route]?.data || null, error: "" };
-          render();
-          try {
-            let data = null;
-            if (route === "/app/trainer/dashboard") {
-              const [home, clients, queue, notices] = await Promise.all([
-                restSelect("v_trainer_home", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "trainer_user_id", value: state.user.id }], single: true }),
-                restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "latest_snapshot_date", ascending: false, nulls: "nullslast" }, limit: 6 }),
-                safeSelect("trainer_queue", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "priority_score", ascending: false }, limit: 6 }, []),
-                safeSelect("notifications", { select: "*", filters: [{ column: "recipient_user_id", value: state.user.id }], order: { column: "created_at", ascending: false }, limit: 5 }, []),
-              ]);
-              data = { home, clients, queue, notices };
-            } else if (route === "/app/trainer/clients") {
-              data = { clients: await restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 80 }) };
-            } else if (route === "/app/trainer/client") {
-              const clientUserId = state.route.query.get("client");
-              const [detail, checkins, progress] = await Promise.all([
-                clientUserId ? restSelect("v_client_detail", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], single: true }) : null,
-                clientUserId ? safeSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], order: { column: "created_at", ascending: false }, limit: 12 }, []) : [],
-                clientUserId ? safeSelect("progress_entries", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "client_user_id", value: clientUserId }], order: { column: "recorded_at", ascending: false }, limit: 12 }, []) : [],
-              ]);
-              data = { detail, checkins, progress };
-            } else if (route === "/app/trainer/programs") {
-              const [clients, plans] = await Promise.all([
-                restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }),
-                restSelect("training_plans", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "updated_at", ascending: false }, limit: 50 }),
-              ]);
-              data = { clients, plans };
-            } else if (route === "/app/trainer/program") {
-              const planId = state.route.query.get("plan");
-              data = {
-                rows: planId ? await restSelect("v_program_detail", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }, { column: "plan_id", value: planId }], order: { column: "week_number", ascending: true }, limit: 300 }) : [],
-              };
-            } else if (route === "/app/trainer/checkins") {
-              data = { checkins: await restSelect("checkins", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "created_at", ascending: false }, limit: 50 }) };
-            } else if (route === "/app/trainer/messages" || route === "/app/client/messages") {
-              const threadFilters = currentRole() === "trainer" ? [{ column: "organization_id", value: currentOrgId() }] : [{ column: "client_user_id", value: state.user.id }];
-              const threads = await restSelect("v_message_threads_overview", { select: "*", filters: threadFilters, order: { column: "updated_at", ascending: false }, limit: 50 });
-              if (!state.ui.selectedThreadId && threads[0]?.id) state.ui.selectedThreadId = threads[0].id;
-              const messages = state.ui.selectedThreadId ? await restSelect("messages", { select: "*", filters: [{ column: "thread_id", value: state.ui.selectedThreadId }], order: { column: "sent_at", ascending: true }, limit: 150 }) : [];
-              const clients = currentRole() === "trainer" ? await restSelect("v_trainer_clients", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "client_name", ascending: true }, limit: 100 }) : [];
-              data = { threads, messages, clients };
-            } else if (route === "/app/trainer/calendar" || route === "/app/client/calendar") {
-              const filters = currentRole() === "trainer" ? [{ column: "organization_id", value: currentOrgId() }] : [{ column: "client_user_id", value: state.user.id }];
-              data = { sessions: await restSelect("v_calendar_agenda", { select: "*", filters, order: { column: "scheduled_for", ascending: true, nulls: "nullslast" }, limit: 60 }) };
-            } else if (route === "/app/trainer/files") {
-              data = { profile: state.profile, organization: state.organization };
-            } else if (route === "/app/trainer/analytics") {
-              data = { metrics: await restSelect("v_growth_metrics", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "day", ascending: false }, limit: 21 }) };
-            } else if (route === "/app/trainer/billing") {
-              data = { requests: await safeSelect("workspace_access_requests", { select: "*", filters: [{ column: "organization_id", value: currentOrgId() }], order: { column: "created_at", ascending: false }, limit: 25 }, []) };
-            } else if (route === "/app/trainer/settings") {
-              data = { organization: state.organization, preferences: state.notificationPreferences };
-            } else if (route === "/app/client/home") {
-              const [today, notices] = await Promise.all([
-                restSelect("v_client_today", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], single: true }),
-                safeSelect("notifications", { select: "*", filters: [{ column: "recipient_user_id", value: state.user.id }], order: { column: "created_at", ascending: false }, limit: 5 }, []),
-              ]);
-              data = { today, notices };
-            } else if (route === "/app/client/plan") {
-              data = { plan: await restSelect("v_client_plan", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], order: { column: "week_number", ascending: true }, limit: 120 }) };
-            } else if (route === "/app/client/checkins") {
-              data = { checkins: await restSelect("checkins", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], order: { column: "created_at", ascending: false }, limit: 30 }) };
-            } else if (route === "/app/client/progress") {
-              data = { progress: await safeSelect("progress_entries", { select: "*", filters: [{ column: "client_user_id", value: state.user.id }], order: { column: "recorded_at", ascending: false }, limit: 50 }, []) };
-            } else if (route === "/app/client/files") {
-              data = { profile: state.profile, organization: state.organization };
-            } else if (route === "/app/client/account") {
-              data = { profile: state.profile, clientProfile: state.clientProfile, preferences: state.notificationPreferences };
-            } else if (route === "/app/admin/overview") {
-              const [accessRows, requests] = await Promise.all([
-                safeSelect("workspace_access", { select: "*", order: { column: "updated_at", ascending: false }, limit: 20 }, []),
-                safeSelect("activation_requests", { select: "*", order: { column: "created_at", ascending: false }, limit: 20 }, []),
-              ]);
-              data = { accessRows, requests };
-            } else if (route === "/app/admin/access") {
-              const [accessRows, requests] = await Promise.all([
-                safeSelect("workspace_access", { select: "*", order: { column: "updated_at", ascending: false }, limit: 60 }, []),
-                safeSelect("workspace_access_requests", { select: "*", order: { column: "created_at", ascending: false }, limit: 60 }, []),
-              ]);
-              data = { accessRows, requests };
-            } else if (route === "/app/admin/access/request") {
-              const requestId = state.route.query.get("request");
-              const request = requestId ? await safeSelect("workspace_access_requests", { select: "*", filters: [{ column: "id", value: requestId }], single: true }, null) : null;
-              const access = request?.organization_id ? await safeSelect("workspace_access", { select: "*", filters: [{ column: "organization_id", value: request.organization_id }], single: true }, null) : null;
-              data = { request, access };
-            } else if (route === "/app/admin/users") {
-              const [memberships, admins] = await Promise.all([
-                safeSelect("organization_memberships", { select: "*", order: { column: "updated_at", ascending: false }, limit: 80 }, []),
-                safeSelect("platform_admin_memberships", { select: "*", order: { column: "updated_at", ascending: false }, limit: 40 }, []),
-              ]);
-              data = { memberships, admins };
-            } else if (route === "/app/admin/support") {
-              data = { queue: await safeSelect("v_admin_support_queue", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
-            } else if (route === "/app/admin/support/detail") {
-              const queueId = state.route.query.get("queue");
-              data = {
-                item: queueId ? await safeSelect("v_admin_support_queue", { select: "*", filters: [{ column: "id", value: queueId }], single: true }, null) : null,
-              };
-            } else if (route === "/app/admin/audit") {
-              data = { audit: await safeSelect("audit_log", { select: "*", order: { column: "created_at", ascending: false }, limit: 80 }, []) };
-            } else if (route === "/app/admin/settings") {
-              data = { flags: await safeSelect("feature_flags", { select: "*", order: { column: "flag_key", ascending: true }, limit: 80 }, []) };
-            }
-            state.views[route] = { status: "ready", data, error: "" };
-          } catch (error) {
-            state.views[route] = { status: "error", data: null, error: error.message || "Request failed" };
-          }
-          render();
-        }
+        // NOTE: loadRouteData is defined below (single canonical copy)
 
         async function loadRouteData() {
           const route = state.route.path;
@@ -3841,6 +3729,15 @@
             </section>
           `;
         }
+
+        // Aliases for render functions referenced in renderAppContent that only have legacy versions
+        const renderMessages = legacyRenderMessages;
+        const renderFiles = legacyRenderFiles;
+        const renderAnalytics = legacyRenderAnalytics;
+        const renderSettings = legacyRenderSettings;
+        const renderClientPlan = legacyRenderClientPlan;
+        const renderClientAccount = legacyRenderClientAccount;
+        const renderTrainerBilling = legacyRenderTrainerBilling;
 
         function renderAppContent() {
           if (!canAccessRoute(state.route.path)) return renderPermissionDenied();
